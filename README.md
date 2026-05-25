@@ -1,4 +1,4 @@
-# 🎓 DUNAB — Gestión de Dinero UNAB
+# DUNAB — Gestión de Dinero UNAB
 
 Sistema completo de gestión financiera para estudiantes de la Universidad Autónoma de Bucaramanga.
 
@@ -7,7 +7,7 @@ Sistema completo de gestión financiera para estudiantes de la Universidad Autó
 
 ---
 
-## 🚀 Cómo ejecutar localmente
+## Cómo ejecutar localmente
 
 ### Requisitos
 - Java 17+
@@ -44,7 +44,7 @@ mvn spring-boot:run
 
 ---
 
-## ☁️ Deploy en Railway (GRATIS)
+## Deploy en Railway (GRATIS)
 
 Railway ofrece $5/mes de créditos gratuitos. Suficiente para este proyecto.
 
@@ -73,7 +73,7 @@ Railway ofrece $5/mes de créditos gratuitos. Suficiente para este proyecto.
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Autenticación (público)
 | Método | URL | Descripción |
@@ -124,7 +124,7 @@ Railway ofrece $5/mes de créditos gratuitos. Suficiente para este proyecto.
 
 ---
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 ```
 Frontend (HTML/CSS/JS)
@@ -154,7 +154,7 @@ MySQL (persistencia)
 
 ---
 
-## 🔒 Seguridad
+## Seguridad
 - Contraseñas cifradas con BCrypt (factor 12)
 - Autenticación JWT (expiración 24h)
 - Spring Security con roles STUDENT / ADMIN
