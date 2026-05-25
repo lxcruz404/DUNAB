@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<script>
+(function(){var t=localStorage.getItem('dunab_theme')||'light';document.documentElement.setAttribute('data-theme',t);var bg=t==='dark'?'#1a0a0f':'#8B1A4A';var card=t==='dark'?'#2d1520':'#fff';document.write('<style>html,body{background:'+bg+' !important}.card{background:'+card+' !important}</style>');})();
+</script>
+<link rel="stylesheet" href="/theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>DUNAB - Mi Cuenta</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh}
+main{padding:28px 36px;max-width:1100px;margin:0 auto}
+.grid{display:grid;grid-template-columns:300px 1fr;gap:20px}
+.card{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px}
+.card-title{font-size:0.95rem;font-weight:700;color:var(--text-primary,#1a1a1a);margin-bottom:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border-color,#f0f0f0);padding-bottom:12px}
+/* Avatar */
+.avatar-wrap{text-align:center;margin-bottom:16px;position:relative;display:inline-block}
+.avatar-img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid #8B1A4A;cursor:pointer;display:block;margin:0 auto}
+.avatar-edit{position:absolute;bottom:2px;right:2px;background:#8B1A4A;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff}
+.avatar-edit i{color:#fff;font-size:0.65rem}
+.user-name{font-size:1.1rem;font-weight:700;color:var(--text-primary,#1a1a1a);text-align:center;margin-bottom:4px}
+.user-career{color:#8B1A4A;font-size:0.85rem;text-align:center;margin-bottom:12px}
+.badge-activo{background:#d4edda;color:#155724;padding:4px 12px;border-radius:12px;font-size:0.75rem;font-weight:600}
+/* Info items */
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color,#f0f0f0);font-size:0.85rem}
+.info-row:last-child{border-bottom:none}
+.info-lbl{color:var(--text-secondary,#888);font-size:0.78rem}
+.info-val{color:var(--text-primary,#1a1a1a);font-weight:500}
+/* Form */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:0.82rem;font-weight:600;color:var(--text-secondary,#555);margin-bottom:5px}
+.input-wrap{position:relative}
+.input-wrap input{width:100%;padding:10px 40px 10px 12px;border:1px solid var(--border-color,#ddd);border-radius:8px;font-size:0.88rem;outline:none;background:var(--input-bg,#fff);color:var(--text-primary,#1a1a1a)}
+.input-wrap input:focus{border-color:#8B1A4A}
+.input-wrap input:disabled{opacity:0.5;cursor:not-allowed;background:var(--table-header,#f5f5f5)}
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary,#888);padding:4px}
+.btn-save{background:#8B1A4A;border:none;border-radius:20px;color:#fff;padding:10px 24px;font-weight:700;cursor:pointer;font-size:0.88rem;display:inline-flex;align-items:center;gap:6px}
+.btn-save:hover{background:#6d1439}
+.read-only-note{font-size:0.75rem;color:var(--text-secondary,#999);margin-top:4px;font-style:italic}
+/* Progress */
+.prog-bar{background:var(--border-color,#e0e0e0);border-radius:10px;height:10px;overflow:hidden;margin-bottom:6px}
+.prog-fill{height:100%;background:#4CAF50;border-radius:10px;transition:width 0.5s}
+/* Achievements */
+.ach-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border-color,#f5f5f5)}
+.ach-item:last-child{border-bottom:none}
+.ach-icon{width:40px;height:40px;border-radius:10px;background:rgba(139,26,74,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ach-icon i{color:#8B1A4A;font-size:1.1rem}
+.ach-name{font-weight:600;font-size:0.88rem;color:var(--text-primary,#1a1a1a);margin-bottom:2px}
+.ach-desc{font-size:0.75rem;color:var(--text-secondary,#888)}
+.ach-date{font-size:0.72rem;color:var(--text-secondary,#bbb);text-align:right;white-space:nowrap}
+.empty-ach{text-align:center;padding:24px;color:var(--text-secondary,#aaa);font-size:0.85rem}
+/* Dark mode */
+[data-theme="dark"] .card{background:var(--card-bg,#2d1520)!important}
+[data-theme="dark"] .card-title,.user-name{color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .info-val{color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .info-lbl{color:var(--text-secondary,#a07080)!important}
+[data-theme="dark"] .info-row{border-color:var(--border-color,#5d3040)!important}
+[data-theme="dark"] .ach-item{border-color:var(--border-color,#5d3040)!important}
+[data-theme="dark"] .ach-icon{background:rgba(139,26,74,0.2)!important}
+[data-theme="dark"] .ach-name{color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .ach-desc,[data-theme="dark"] .ach-date{color:var(--text-secondary,#a07080)!important}
+[data-theme="dark"] .input-wrap input{background:var(--input-bg,#3d2030)!important;color:var(--text-primary,#f0e6ea)!important;border-color:var(--border-color,#5d3040)!important}
+[data-theme="dark"] .input-wrap input:disabled{background:var(--table-header,#2d1520)!important}
+[data-theme="dark"] .form-group label{color:var(--text-secondary,#a07080)!important}
+[data-theme="dark"] .prog-bar{background:var(--input-bg,#3d2030)!important}
+[data-theme="dark"] .badge-activo{background:rgba(46,125,50,0.2)!important;color:#81c784!important}
+[data-theme="dark"] .user-career{color:#E8A020!important}
+[data-theme="dark"] .read-only-note{color:var(--text-secondary,#806070)!important}
+[data-theme="dark"] .card-title{border-color:var(--border-color,#5d3040)!important}
+@media(max-width:768px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div id="nav-container"></div>
+<main>
+  <div class="grid">
+    <!-- LEFT COLUMN -->
+    <div>
+      <div class="card" style="text-align:center">
+        <div class="avatar-wrap">
+          <img id="profile-avatar" class="avatar-img" src="https://ui-avatars.com/api/?name=U&background=8B1A4A&color=fff&size=200">
+          <div class="avatar-edit" onclick="document.getElementById('photo-input').click()">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="uploadPhoto(this)">
+        </div>
+        <div class="user-name" id="p-name">-</div>
+        <div class="user-career" id="p-career">-</div>
+        <span class="badge-activo">Activo</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-address-card" style="color:#8B1A4A"></i> Información de contacto</div>
+        <div class="info-row"><span class="info-lbl">Correo</span><span class="info-val" id="p-email">-</span></div>
+        <div class="info-row"><span class="info-lbl">Codigo</span><span class="info-val" id="p-code">-</span></div>
+        <div class="info-row"><span class="info-lbl">Teléfono</span><span class="info-val" id="p-phone">No registrado</span></div>
+        <div class="info-row"><span class="info-lbl">Dirección</span><span class="info-val" id="p-address">No registrada</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-graduation-cap" style="color:#8B1A4A"></i> Información académica</div>
+        <div class="info-row"><span class="info-lbl">Carrera</span><span class="info-val" id="i-career">-</span></div>
+        <div class="info-row"><span class="info-lbl">Semestre</span><span class="info-val" id="i-semester">-</span></div>
+        <div class="info-row"><span class="info-lbl">Modalidad</span><span class="info-val">Presencial</span></div>
+        <div class="info-row"><span class="info-lbl">Ciudad</span><span class="info-val">Bucaramanga</span></div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <!-- DUNAB Progress -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-circle-check" style="color:#4CAF50"></i> Seguimiento DUNAB</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:0.82rem;color:var(--text-secondary,#888)">DUNAB Acumulado</span>
+          <span style="font-weight:700;color:#E8A020" id="dunab-num">0 D</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="dunab-prog" style="width:0%"></div></div>
+        <div style="font-size:0.78rem;color:var(--text-secondary,#888);margin-bottom:10px" id="dunab-text">0 / 10.000 DUNAB</div>
+        <button class="btn-save" onclick="window.location='/transactions.html'" style="background:#E8A020">
+          <i class="fa-solid fa-clock-rotate-left"></i> Ver historial completo
+        </button>
+      </div>
+
+      <!-- Edit own data -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-pen-to-square" style="color:#8B1A4A"></i> Editar mis datos</div>
+        <p class="read-only-note" style="margin-bottom:14px"><i class="fa-solid fa-circle-info"></i> Tu nombre, correo, carrera y semestre solo pueden ser modificados por un administrador.</p>
+        <div class="form-group">
+          <label>Numero de Teléfono</label>
+          <div class="input-wrap"><input type="tel" id="e-phone" placeholder="Ej: 3001234567"></div>
+        </div>
+        <div class="form-group">
+          <label>Dirección</label>
+          <div class="input-wrap"><input type="text" id="e-address" placeholder="Ej: Calle 45 # 12-34"></div>
+        </div>
+        <button class="btn-save" id="save-btn" onclick="saveProfile()">
+          <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
+        </button>
+      </div>
+
+      <!-- Change password -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-lock" style="color:#8B1A4A"></i> Cambiar contraseña</div>
+        <div class="form-group">
+          <label>Contraseña actual</label>
+          <div class="input-wrap">
+            <input type="password" id="old-pass" placeholder="Tu contraseña actual" autocomplete="current-password">
+            <button type="button" class="eye-btn" onclick="togglePass('old-pass',this)"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Nueva contraseña (min. 6 caracteres)</label>
+          <div class="input-wrap">
+            <input type="password" id="new-pass" placeholder="Nueva contraseña" autocomplete="new-password">
+            <button type="button" class="eye-btn" onclick="togglePass('new-pass',this)"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Confirmar nueva contraseña</label>
+          <div class="input-wrap">
+            <input type="password" id="confirm-pass" placeholder="Repite la nueva contraseña" autocomplete="new-password">
+            <button type="button" class="eye-btn" onclick="togglePass('confirm-pass',this)"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <button class="btn-save" id="pass-btn" onclick="changePassword()">
+          <i class="fa-solid fa-key"></i> Cambiar contraseña
+        </button>
+      </div>
+
+      <!-- Achievements -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-medal" style="color:#E8A020"></i> Tus Logros y Progreso</div>
+        <div id="achievements-list"><div class="empty-ach">Cargando logros...</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="/theme.js"></script>
+<script src="/api.js"></script>
+<script src="/layout.js"></script>
+<script>
+async function init() {
+  const u = requireAuth(); if (!u) return;
+  const res = await UserAPI.getProfile();
+  if (!res?.data) return;
+  const d = res.data;
+  document.getElementById('header-container').innerHTML = renderHeader('Bienvenido, ' + d.fullName.split(' ')[0], '', d);
+  document.getElementById('nav-container').innerHTML = renderNav('profile');
+  initTheme();
+
+  document.getElementById('p-name').textContent = d.fullName;
+  document.getElementById('p-career').textContent = d.career || 'UNAB';
+  document.getElementById('p-email').textContent = d.email;
+  document.getElementById('p-code').textContent = d.studentCode;
+  document.getElementById('p-phone').textContent = d.phone || 'No registrado';
+  document.getElementById('p-address').textContent = d.address || 'No registrada';
+  document.getElementById('i-career').textContent = d.career || '-';
+  document.getElementById('i-semester').textContent = d.semester ? d.semester + '° Semestre' : '-';
+  document.getElementById('e-phone').value = d.phone || '';
+  document.getElementById('e-address').value = d.address || '';
+  document.getElementById('profile-avatar').src = d.profilePhotoUrl ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(d.fullName)}&background=8B1A4A&color=fff&size=200`;
+
+  const pct = Math.min((d.dunabBalance / 10000) * 100, 100);
+  document.getElementById('dunab-prog').style.width = pct + '%';
+  document.getElementById('dunab-num').textContent = UI.formatDunab(d.dunabBalance);
+  document.getElementById('dunab-text').textContent = Math.round(d.dunabBalance) + ' / 10.000 DUNAB (' + Math.round(pct) + '%)';
+
+  const achRes = await UserAPI.getAchievements();
+  const achList = document.getElementById('achievements-list');
+  if (!achRes?.data || achRes.data.length === 0) {
+    achList.innerHTML = '<div class="empty-ach"><i class="fa-solid fa-rocket"></i> Participa en encuentros y gana DUNAB para desbloquear logros</div>';
+  } else {
+    achList.innerHTML = achRes.data.map(a => `
+      <div class="ach-item">
+        <div class="ach-icon"><i class="fa-solid fa-${a.emoji||'medal'}"></i></div>
+        <div style="flex:1">
+          <div class="ach-name">${a.displayName}</div>
+          <div class="ach-desc">${a.description}</div>
+        </div>
+        <div class="ach-date">${UI.formatDate(a.unlockedAt)}</div>
+      </div>`).join('');
+  }
+  initTheme();
+}
+
+async function uploadPhoto(input) {
+  if (!input.files[0]) return;
+  try {
+    const res = await UserAPI.uploadPhoto(input.files[0]);
+    if (res?.success) {
+      UI.toast('Foto actualizada', 'success');
+      document.getElementById('profile-avatar').src = res.data + '?t=' + Date.now();
+    } else UI.toast(res?.message || 'Error', 'error');
+  } catch(err) { UI.toast(err.message, 'error'); }
+}
+
+async function saveProfile() {
+  const btn = document.getElementById('save-btn');
+  UI.setButtonLoading(btn, true);
+  try {
+    const res = await apiRequest('/users/me', {
+      method: 'PUT',
+      body: JSON.stringify({
+        phone: document.getElementById('e-phone').value.trim(),
+        address: document.getElementById('e-address').value.trim()
+      })
+    });
+    if (res?.success) { UI.toast('Datos actualizados correctamente', 'success'); await init(); }
+    else UI.toast(res?.message || 'Error', 'error');
+  } catch(err) { UI.toast(err.message, 'error'); }
+  finally { UI.setButtonLoading(btn, false); }
+}
+
+async function changePassword() {
+  const oldPass = document.getElementById('old-pass').value;
+  const newPass = document.getElementById('new-pass').value;
+  const confirmPass = document.getElementById('confirm-pass').value;
+  const btn = document.getElementById('pass-btn');
+  if (!oldPass) { UI.toast('Ingresa tu contraseña actual', 'error'); return; }
+  if (!newPass || newPass.length < 6) { UI.toast('La nueva contraseña debe tener al menos 6 caracteres', 'error'); return; }
+  if (newPass !== confirmPass) { UI.toast('Las contraseñas no coinciden', 'error'); return; }
+  UI.setButtonLoading(btn, true);
+  try {
+    const res = await apiRequest('/users/me/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ oldPassword: oldPass, newPassword: newPass })
+    });
+    if (res?.success) {
+      UI.toast('Contraseña cambiada correctamente', 'success');
+      document.getElementById('old-pass').value = '';
+      document.getElementById('new-pass').value = '';
+      document.getElementById('confirm-pass').value = '';
+    } else UI.toast(res?.message || 'Error', 'error');
+  } catch(err) { UI.toast(err.message, 'error'); }
+  finally { UI.setButtonLoading(btn, false); }
+}
+
+function togglePass(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+  btn.innerHTML = isPass
+    ? '<i class="fa-solid fa-eye-slash"></i>'
+    : '<i class="fa-solid fa-eye"></i>';
+}
+
+init();
+</script>
+</body>
+</html>

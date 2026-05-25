@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>DUNAB - Iniciar Sesion</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:20px;overflow:hidden;width:100%;max-width:860px;display:flex;min-height:520px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.left{padding:48px 44px;flex:1;display:flex;flex-direction:column;justify-content:center}
+.logo-wrap{margin-bottom:28px}
+.logo-wrap img{height:64px;object-fit:contain}
+h2{font-size:1.4rem;font-weight:700;color:#1a1a1a;margin-bottom:6px}
+.subtitle{color:#666;font-size:0.88rem;margin-bottom:28px;line-height:1.5}
+.form-group{margin-bottom:18px}
+label{display:block;font-weight:600;font-size:0.88rem;color:#1a1a1a;margin-bottom:7px}
+input{width:100%;padding:12px 16px;background:#f0f0f0;border:2px solid transparent;border-radius:10px;font-size:0.9rem;color:#1a1a1a;outline:none;transition:all 0.2s}
+input:focus{background:#fff;border-color:#8B1A4A}
+.btn{width:100%;padding:14px;background:#8B1A4A;border:none;border-radius:25px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{background:#6d1439}
+.btn:disabled{opacity:0.6;cursor:not-allowed}
+.links{display:flex;justify-content:space-between;margin-top:16px;font-size:0.85rem}
+.links a{color:#8B1A4A;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.error{background:#fde8e8;border:1px solid #f5c6c6;border-radius:8px;padding:10px 14px;color:#c0392b;font-size:0.83rem;margin-bottom:14px;display:none}
+.forgot-msg{display:none;background:#fff8e6;border:1px solid #f5a623;border-radius:8px;padding:12px 14px;font-size:0.82rem;color:#a07000;margin-top:12px;line-height:1.6}
+.admin-link{margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;text-align:center}
+.admin-link a{display:inline-flex;align-items:center;gap:8px;color:#8B1A4A;text-decoration:none;font-size:0.82rem;font-weight:600;padding:8px 18px;border:1px solid rgba(139,26,74,0.25);border-radius:20px;transition:all 0.2s}
+.admin-link a:hover{background:rgba(139,26,74,0.06)}
+/* RIGHT PANEL - university building photo */
+.right{flex:0 0 340px;background:#8B1A4A;border-radius:0 20px 20px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+  .right img{width:80%;max-width:220px;object-fit:contain;filter:brightness(0) invert(1);opacity:0.9}
+  .right p{color:rgba(255,255,255,0.7);font-size:0.8rem;text-align:center;margin-top:16px;line-height:1.5;letter-spacing:0.3px}
+@media(max-width:700px){.right{display:none}.left{padding:32px 28px}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="left">
+    <div class="logo-wrap">
+      <img src="/logo-unab.png" alt="Universidad UNAB" onerror="this.style.display='none'">
+    </div>
+    <h2>Bienvenido al Sistema de Estudiantes</h2>
+    <p class="subtitle">Ingresa tus credenciales UNAB para acceder a todos los servicios</p>
+    <div class="error" id="error-msg"></div>
+    <form id="login-form">
+      <div class="form-group">
+        <label>Correo institucional</label>
+        <input type="email" id="email" placeholder="correo@unab.edu.co" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <div style="position:relative">
+        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" style="padding-right:44px">
+        <button type="button" onclick="togglePw()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#888;padding:4px"><i id="pass-eye" class="fa-solid fa-eye"></i></button>
+      </div>
+      </div>
+      <button type="submit" class="btn" id="login-btn">
+        <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesion
+      </button>
+    </form>
+    <div class="links">
+      <a href="#" onclick="toggleForgot(event)">
+        <i class="fa-solid fa-lock-open"></i> Olvido su contraseña?
+      </a>
+      <a href="/register.html">
+        <i class="fa-solid fa-user-plus"></i> Crear Cuenta
+      </a>
+    </div>
+    <div class="forgot-msg" id="forgot-msg">
+      <strong><i class="fa-solid fa-circle-info" style="color:#E8A020"></i> Recuperacion de contraseña</strong><br>
+      Para restablecer tu contraseña, contacta a un administrador DUNAB con tu codigo estudiantil.
+      <span style="color:#888;font-size:0.78rem;margin-top:4px;display:block">Proximamente: verificacion con correo institucional @unab.edu.co</span>
+    </div>
+    <div class="admin-link">
+      <a href="/admin-login.html">
+        <i class="fa-solid fa-gear"></i> Ingresar como administrador
+      </a>
+    </div>
+  </div>
+  <div class="right">
+    <img src="/logo-unab.png" alt="UNAB">
+    <p>Universidad Autonoma<br>de Bucaramanga<br><br>Sistema de Gestion<br>DUNAB</p>
+  </div>
+</div>
+<script src="/api.js"></script>
+<script>
+function togglePw() {
+  const input = document.getElementById('password');
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  document.getElementById('pass-eye').className = show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+}
+function toggleForgot(e){
+  e.preventDefault();
+  const el=document.getElementById('forgot-msg');
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+redirectIfLoggedIn();
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn=document.getElementById('login-btn');
+  const errEl=document.getElementById('error-msg');
+  errEl.style.display='none';
+  UI.setButtonLoading(btn,true);
+  try {
+    const res=await AuthAPI.login(document.getElementById('email').value, document.getElementById('password').value);
+    if(res?.success){
+      if(Auth.isAdmin()){
+        Auth.removeToken(); Auth.removeUser();
+        errEl.textContent='Este portal es solo para estudiantes. Usa el acceso de administrador.';
+        errEl.style.display='block';
+        return;
+      }
+      window.location.href='/dashboard.html';
+    } else {
+      errEl.textContent=res?.message||'Credenciales incorrectas';
+      errEl.style.display='block';
+    }
+  } catch(err){ errEl.textContent=err.message; errEl.style.display='block'; }
+  finally { UI.setButtonLoading(btn,false); }
+});
+</script>
+</body>
+</html>

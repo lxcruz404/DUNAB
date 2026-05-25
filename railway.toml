@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+buildCommand = "mvn clean package -DskipTests"
+
+[deploy]
+startCommand = "java -Dspring.profiles.active=prod -jar target/dunab-1.0.0.jar"
+healthcheckPath = "/api/auth/check"
+restartPolicyType = "on_failure"

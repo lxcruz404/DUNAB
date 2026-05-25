@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<script>
+(function(){var t=localStorage.getItem('dunab_theme')||'light';document.documentElement.setAttribute('data-theme',t);var bg=t==='dark'?'#1a0a0f':'#8B1A4A';var card=t==='dark'?'#2d1520':'#fff';document.write('<style>html,body{background:'+bg+' !important}.card,.shortcut{background:'+card+' !important}</style>');})();
+</script>
+<link rel="stylesheet" href="/theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>DUNAB - Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh}
+main{padding:28px 36px;max-width:1200px;margin:0 auto}
+.grid-top{display:grid;grid-template-columns:260px 1fr;gap:20px;margin-bottom:20px}
+.card{background:#fff;border-radius:16px;padding:24px}
+.card-title{font-size:1rem;font-weight:700;color:var(--text-primary,#1a1a1a);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.account-card{text-align:center}
+.account-career{color:var(--text-secondary,#666);font-size:0.85rem;margin-bottom:6px}
+.account-code{color:#E8A020;font-weight:700;font-size:1rem;margin-bottom:14px}
+.btn-profile{background:#E8A020;border:none;border-radius:20px;color:#fff;padding:8px 20px;font-size:0.85rem;font-weight:600;cursor:pointer}
+.prog-title{color:#E8A020;font-size:1rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.progress-nums{display:flex;gap:40px;margin-bottom:14px}
+.prog-item{text-align:center}
+.prog-item .num{font-size:2.2rem;font-weight:800;color:var(--text-primary,#1a1a1a)}
+.prog-item .lbl{font-size:0.78rem;color:var(--text-secondary,#888)}
+.prog-bar{background:var(--border-color,#e0e0e0);border-radius:20px;height:12px;overflow:hidden;margin-bottom:10px}
+.prog-fill{height:100%;background:#4CAF50;border-radius:20px;transition:width 0.5s}
+.prog-pct{font-size:0.82rem;color:#4CAF50;font-weight:600}
+.btn-detail{background:#E8A020;border:none;border-radius:20px;color:#fff;padding:8px 24px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:10px}
+.shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.shortcut{background:#fff;border-radius:16px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s;text-decoration:none;display:block}
+.shortcut:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.15)}
+.shortcut-icon{font-size:1.6rem;margin-bottom:10px;color:#8B1A4A}
+.shortcut-name{font-weight:700;font-size:0.9rem;color:var(--text-primary,#1a1a1a);margin-bottom:4px}
+.shortcut-desc{font-size:0.75rem;color:var(--text-secondary,#888);line-height:1.4}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.tx-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+.tx-table th{text-align:left;padding:10px 12px;background:var(--table-header,#f5f5f5);color:var(--text-secondary,#555);font-weight:600;font-size:0.78rem}
+.tx-table td{padding:10px 12px;border-bottom:1px solid var(--border-color,#f0f0f0);color:var(--text-primary,#1a1a1a)}
+.badge{padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600}
+.badge.ingreso{background:#d4edda;color:#155724}
+.badge.gasto{background:#f8d7da;color:#721c24}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:0.82rem;font-weight:600;color:var(--text-primary,#333);margin-bottom:5px}
+.form-group input,.form-group select{width:100%;padding:10px 12px;border:1px solid var(--border-color,#ddd);border-radius:8px;font-size:0.88rem;outline:none;background:var(--input-bg,#fff);color:var(--text-primary,#1a1a1a)}
+.form-group input:focus,.form-group select:focus{border-color:#8B1A4A}
+.code-input{font-family:monospace;letter-spacing:2px;text-transform:uppercase}
+.code-hint{font-size:0.75rem;color:var(--text-secondary,#888);margin-top:4px}
+.code-error{font-size:0.75rem;color:#dc3545;margin-top:4px;display:none}
+.type-btns{display:flex;gap:8px;margin-bottom:12px}
+.type-btn{flex:1;padding:8px;border:2px solid var(--border-color,#ddd);border-radius:8px;background:var(--card-bg,#fff);cursor:pointer;font-size:0.85rem;font-weight:600;color:var(--text-primary,#333)}
+.type-btn.active-ingreso{border-color:#28a745;background:#d4edda;color:#155724}
+.type-btn.active-gasto{border-color:#dc3545;background:#f8d7da;color:#721c24}
+.btn-submit{width:100%;padding:11px;background:#8B1A4A;border:none;border-radius:20px;color:#fff;font-weight:700;cursor:pointer;font-size:0.9rem}
+.btn-submit:hover{background:#6d1439}
+.empty{text-align:center;padding:30px;color:var(--text-secondary,#aaa);font-size:0.88rem}
+.ann-block{padding:12px;border-radius:8px;margin-bottom:10px;border-left:4px solid #8B1A4A}
+.ann-block.INFO{background:#e3f2fd;border-color:#1976d2}
+.ann-block.WARNING{background:#fff8e6;border-color:#E8A020}
+.ann-block.SUCCESS{background:#e8f5e9;border-color:#2e7d32}
+.ann-block.URGENT{background:#fde8e8;border-color:#c62828}
+.ann-title{font-weight:700;font-size:0.88rem;color:#1a1a1a;margin-bottom:4px}
+.ann-content{font-size:0.82rem;color:#555;line-height:1.5}
+@media(max-width:768px){.grid-top{grid-template-columns:1fr}.shortcuts{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div id="nav-container"></div>
+<main>
+  <div class="grid-top">
+    <div class="card account-card">
+      <div class="card-title"><i class="fa-solid fa-circle-user" style="color:#8B1A4A"></i> Mi Cuenta</div>
+      <img id="acc-avatar" src="https://ui-avatars.com/api/?name=U&background=8B1A4A&color=fff&size=200"
+        style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #8B1A4A;margin:0 auto 12px;display:block;cursor:pointer"
+        onclick="window.location='/profile.html'">
+      <div class="account-career" id="acc-career">Cargando...</div>
+      <div class="account-code" id="acc-code"></div>
+      <button class="btn-profile" onclick="window.location='/profile.html'">Editar perfil</button>
+    </div>
+    <div class="card">
+      <div class="prog-title"><i class="fa-solid fa-circle-check" style="color:#4CAF50"></i> Progreso de DUNAB</div>
+      <div class="progress-nums">
+        <div class="prog-item"><div class="num" id="bal-num">0</div><div class="lbl">Acumulada</div></div>
+        <div class="prog-item"><div class="num" id="prog-faltantes">0</div><div class="lbl">Faltantes</div></div>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-pct" id="prog-pct">0% del requisito cumplido</div>
+      <button class="btn-detail" onclick="window.location='/transactions.html'">Ver detalles</button>
+    </div>
+  </div>
+
+  <div class="shortcuts">
+    <a class="shortcut" href="/transactions.html">
+      <div class="shortcut-icon"><i class="fa-solid fa-circle-dollar-to-slot"></i></div>
+      <div class="shortcut-name">Seguimiento Dinero</div>
+      <div class="shortcut-desc">Controla tus ingresos y gastos.</div>
+    </a>
+    <a class="shortcut" href="/profile.html">
+      <div class="shortcut-icon"><i class="fa-solid fa-medal"></i></div>
+      <div class="shortcut-name">Logros y Progreso</div>
+      <div class="shortcut-desc">Revisa tu avance y resultados.</div>
+    </a>
+    <a class="shortcut" href="/goals.html">
+      <div class="shortcut-icon"><i class="fa-solid fa-bullseye"></i></div>
+      <div class="shortcut-name">Metas de Ahorro</div>
+      <div class="shortcut-desc">Define y sigue tus objetivos.</div>
+    </a>
+    <a class="shortcut" href="/encounters.html">
+      <div class="shortcut-icon"><i class="fa-solid fa-trophy"></i></div>
+      <div class="shortcut-name">Encuentros</div>
+      <div class="shortcut-desc">Participa y gana puntos DUNAB.</div>
+    </a>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-clock-rotate-left" style="color:#8B1A4A"></i> Historial de transacciones</div>
+      <table class="tx-table">
+        <thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>DUNAB</th><th>Tipo</th></tr></thead>
+        <tbody id="tx-body"><tr><td colspan="5" class="empty">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-pen-to-square" style="color:#8B1A4A"></i> Registrar movimiento</div>
+      <div class="type-btns">
+        <button class="type-btn active-ingreso" id="btn-ingreso" onclick="setType('INGRESO',this)">
+          <i class="fa-solid fa-arrow-up"></i> Ingreso
+        </button>
+        <button class="type-btn" id="btn-gasto" onclick="setType('GASTO',this)">
+          <i class="fa-solid fa-arrow-down"></i> Gasto
+        </button>
+      </div>
+      <!-- Código DUNAB solo para ingresos -->
+      <div id="dunab-code-group" class="form-group">
+        <label><i class="fa-solid fa-barcode" style="color:#8B1A4A;margin-right:4px"></i> Código DUNAB <span style="color:#dc3545">*</span></label>
+        <input type="text" id="tx-code" class="code-input" placeholder="Ej: DNAB12345" oninput="validateCode(this)" maxlength="20">
+        <div class="code-hint" id="code-hint">Código del comprobante UNAB. Siempre empieza por DNAB.</div>
+        <div class="code-error" id="code-error"><i class="fa-solid fa-triangle-exclamation"></i> Codigo invalido. Debe ser DNAB seguido de numeros.</div>
+      </div>
+      <div class="form-group"><label>Monto (DUNAB)</label><input type="number" id="tx-amount" placeholder="Ej: 150" min="0.01" step="0.01"></div>
+      <div class="form-group"><label>Categoría</label>
+        <select id="tx-category">
+          <option value="ALIMENTACION">Alimentacion</option>
+          <option value="TRANSPORTE">Transporte</option>
+          <option value="MATERIALES">Materiales</option>
+          <option value="ACTIVIDADES">Actividades</option>
+          <option value="ENTRETENIMIENTO">Entretenimiento</option>
+          <option value="SALUD">Salud</option>
+          <option value="TRANSFERENCIA">Transferencia</option>
+          <option value="OTROS">Otros</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="tx-desc" placeholder="¿En qué gastaste o ganaste?"></div>
+      <button class="btn-submit" id="tx-btn" onclick="registerTransaction()">
+        <i class="fa-solid fa-floppy-disk"></i> Registrar
+      </button>
+    </div>
+  </div>
+
+  <div id="ann-section" style="margin-top:20px;display:none">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0"><i class="fa-solid fa-bullhorn" style="color:#8B1A4A"></i> Anuncios y Noticias</div>
+        <a href="/announcements.html" style="font-size:0.8rem;color:#8B1A4A;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:4px">
+          Ver todos <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+      <div id="ann-list-student"></div>
+    </div>
+  </div>
+</main>
+
+<script src="/theme.js"></script>
+<script src="/api.js"></script>
+<script src="/layout.js"></script>
+<script>
+let currentType = 'INGRESO';
+const META = 10000;
+
+async function init() {
+  const u = requireAuth(); if (!u) return;
+  const pr = await UserAPI.getProfile();
+  if (!pr?.data) return;
+  const data = pr.data;
+  Auth.setUser(data);
+  document.getElementById('header-container').innerHTML = renderHeader(
+    'Bienvenido, ' + data.fullName.split(' ')[0], null, data);
+  document.getElementById('nav-container').innerHTML = renderNav('dashboard');
+  initTheme();
+  document.getElementById('acc-career').textContent = data.career || 'UNAB';
+  document.getElementById('acc-avatar').src = data.profilePhotoUrl ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(data.fullName)}&background=8B1A4A&color=fff&size=200`;
+  document.getElementById('acc-code').textContent = data.studentCode;
+  document.getElementById('bal-num').textContent = Math.round(data.dunabBalance);
+  const pct = Math.min((data.dunabBalance/META)*100,100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = Math.round(pct)+'% del requisito cumplido.';
+  document.getElementById('prog-faltantes').textContent = Math.round(Math.max(META-data.dunabBalance,0));
+  loadTransactions();
+  loadAnnouncements();
+  startUnreadPolling(false); // Start notification polling for students
+}
+
+async function loadTransactions() {
+  const res = await TransactionAPI.getRecent();
+  const tbody = document.getElementById('tx-body');
+  if (!res?.data || res.data.length===0) {
+    tbody.innerHTML='<tr><td colspan="5" class="empty">No hay movimientos aun</td></tr>';
+    return;
+  }
+  tbody.innerHTML=res.data.map(tx=>`<tr>
+    <td>${UI.formatDate(tx.transactionDate)}</td>
+    <td>${tx.description}</td>
+    <td>${tx.category}</td>
+    <td>${Math.abs(tx.amount)}</td>
+    <td><span class="badge ${tx.type.toLowerCase()}">${tx.type==='INGRESO'?'Ingreso':'Egreso'}</span></td>
+  </tr>`).join('');
+}
+
+async function loadAnnouncements() {
+  try {
+    const res = await fetch('/api/announcements');
+    const data = await res.json();
+    const list = data?.data || [];
+    const section = document.getElementById('ann-section');
+    const annList = document.getElementById('ann-list-student');
+    if (!list.length) { section.style.display='none'; return; }
+    section.style.display='block';
+    const typeLabels={INFO:'Información',WARNING:'Advertencia',SUCCESS:'Aviso',URGENT:'Urgente'};
+    const typeIcons={INFO:'fa-circle-info',WARNING:'fa-triangle-exclamation',SUCCESS:'fa-circle-check',URGENT:'fa-circle-exclamation'};
+    annList.innerHTML = list.map(a=>`
+      <div class="ann-block ${a.type}">
+        <div class="ann-title"><i class="fa-solid ${typeIcons[a.type]||'fa-bullhorn'}"></i> ${typeLabels[a.type]||''}: ${a.title}</div>
+        <div class="ann-content">${a.content}</div>
+        <div style="font-size:0.72rem;color:#aaa;margin-top:6px">${UI.formatDate(a.createdAt)}</div>
+      </div>`).join('');
+    initTheme();
+  } catch(e) { /* silent */ }
+}
+
+function setType(type, btn) {
+  currentType = type;
+  document.getElementById('btn-ingreso').className = 'type-btn';
+  document.getElementById('btn-gasto').className = 'type-btn';
+  btn.className = 'type-btn active-' + type.toLowerCase();
+  // Show DUNAB code only for INGRESO
+  const codeGroup = document.getElementById('dunab-code-group');
+  codeGroup.style.display = type === 'INGRESO' ? 'block' : 'none';
+  if (type === 'GASTO') {
+    document.getElementById('tx-code').value = '';
+    document.getElementById('code-error').style.display = 'none';
+  }
+}
+
+function validateCode(input) {
+  const val = input.value.toUpperCase();
+  input.value = val;
+  const err = document.getElementById('code-error');
+  const hint = document.getElementById('code-hint');
+  const valid = /^DNAB\d+$/.test(val) || val === '';
+  if (val && !valid) {
+    err.style.display = 'block';
+    hint.style.display = 'none';
+    input.style.borderColor = '#dc3545';
+  } else {
+    err.style.display = 'none';
+    hint.style.display = 'block';
+    input.style.borderColor = (val && valid) ? '#4CAF50' : '';
+  }
+}
+
+async function registerTransaction() {
+  const amount = parseFloat(document.getElementById('tx-amount').value);
+  const category = document.getElementById('tx-category').value;
+  const description = document.getElementById('tx-desc').value.trim();
+  const code = document.getElementById('tx-code').value.trim().toUpperCase();
+  const btn = document.getElementById('tx-btn');
+
+  if (!amount || amount <= 0) { UI.toast('Ingresa un monto valido','error'); return; }
+  if (!description) { UI.toast('Ingresa una Descripción','error'); return; }
+
+  if (currentType === 'INGRESO') {
+    if (!code) { UI.toast('Ingresa el Código DUNAB del comprobante','error'); return; }
+    if (!/^DNAB\d+$/.test(code)) { UI.toast('El codigo debe ser DNAB seguido de numeros. Ej: DNAB12345','error'); return; }
+  }
+
+  UI.setButtonLoading(btn, true);
+  try {
+    const res = await TransactionAPI.create(amount, category, currentType, description);
+    if (res?.success) {
+      UI.toast('Movimiento registrado correctamente', 'success');
+      document.getElementById('tx-amount').value = '';
+      document.getElementById('tx-desc').value = '';
+      document.getElementById('tx-code').value = '';
+      document.getElementById('code-hint').style.display = 'block';
+      document.getElementById('code-error').style.display = 'none';
+      await init();
+    } else {
+      UI.toast(res?.message || 'Error al registrar', 'error');
+    }
+  } catch(err) { UI.toast(err.message, 'error'); }
+  finally { UI.setButtonLoading(btn, false); }
+}
+
+init();
+</script>
+</body>
+</html>

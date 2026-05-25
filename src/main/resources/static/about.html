@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<script>
+(function(){var t=localStorage.getItem('dunab_theme')||'light';document.documentElement.setAttribute('data-theme',t);var bg=t==='dark'?'#1a0a0f':'#8B1A4A';var card=t==='dark'?'#2d1520':'#fff';document.write('<style>html,body{background:'+bg+' !important}.card{background:'+card+' !important}</style>');})();
+</script>
+<link rel="stylesheet" href="/theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>DUNAB - Que son los DUNAB</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh}
+main{padding:28px 36px;max-width:960px;margin:0 auto}
+.card{background:#fff;border-radius:16px;padding:28px 32px;margin-bottom:20px}
+.hero-card{background:linear-gradient(135deg,#8B1A4A,#6d1439);border-radius:16px;padding:40px 36px;margin-bottom:20px;text-align:center}
+.hero-icon{font-size:4rem;color:rgba(255,255,255,0.9);margin-bottom:16px}
+.hero-title{font-size:1.8rem;font-weight:800;color:#fff;margin-bottom:10px}
+.hero-sub{color:rgba(255,255,255,0.8);font-size:1rem;line-height:1.6;max-width:600px;margin:0 auto}
+.section-title{font-size:1.1rem;font-weight:700;color:#8B1A4A;margin-bottom:18px;display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:2px solid rgba(139,26,74,0.1)}
+.section-title i{width:28px;height:28px;background:rgba(139,26,74,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:4px}
+.info-box{background:rgba(139,26,74,0.05);border:1px solid rgba(139,26,74,0.12);border-radius:12px;padding:18px;text-align:center}
+.info-box i{font-size:1.5rem;color:#8B1A4A;margin-bottom:10px}
+.info-box h4{font-size:0.9rem;font-weight:700;color:var(--text-primary,#1a1a1a);margin-bottom:6px}
+.info-box p{font-size:0.78rem;color:var(--text-secondary,#777);line-height:1.5}
+.step{display:flex;gap:16px;margin-bottom:18px;align-items:flex-start}
+.step-num{width:36px;height:36px;border-radius:50%;background:#8B1A4A;color:#fff;font-weight:800;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-title{font-weight:700;font-size:0.95rem;color:var(--text-primary,#1a1a1a);margin-bottom:4px}
+.step-desc{font-size:0.84rem;color:var(--text-secondary,#666);line-height:1.5}
+.ach-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.ach-box{display:flex;gap:12px;align-items:center;padding:14px;background:rgba(139,26,74,0.04);border:1px solid rgba(139,26,74,0.1);border-radius:10px}
+.ach-box .ico{width:40px;height:40px;border-radius:10px;background:rgba(139,26,74,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ach-box .ico i{color:#8B1A4A;font-size:1.1rem}
+.ach-box h5{font-size:0.85rem;font-weight:700;color:var(--text-primary,#1a1a1a);margin-bottom:2px}
+.ach-box p{font-size:0.75rem;color:var(--text-secondary,#888);line-height:1.4}
+.code-example{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:10px;padding:16px;margin-top:12px;font-family:monospace;font-size:0.9rem;color:#333;display:flex;align-items:center;gap:12px}
+.faq-item{border-bottom:1px solid var(--border-color,#f0f0f0);padding:14px 0}
+.faq-item:last-child{border-bottom:none}
+.faq-q{font-weight:700;font-size:0.9rem;color:var(--text-primary,#1a1a1a);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.faq-q i{color:#8B1A4A;width:16px}
+.faq-a{font-size:0.83rem;color:var(--text-secondary,#666);line-height:1.6;padding-left:24px}
+/* Dark mode */
+[data-theme="dark"] .card{background:var(--card-bg,#2d1520)!important}
+[data-theme="dark"] .info-box{background:rgba(139,26,74,0.1)!important;border-color:rgba(139,26,74,0.2)!important}
+[data-theme="dark"] .info-box h4,[data-theme="dark"] .step-title,[data-theme="dark"] .ach-box h5{color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .info-box p,[data-theme="dark"] .step-desc,[data-theme="dark"] .ach-box p,[data-theme="dark"] .faq-a{color:var(--text-secondary,#a07080)!important}
+[data-theme="dark"] .ach-box{background:rgba(139,26,74,0.1)!important;border-color:rgba(139,26,74,0.2)!important}
+[data-theme="dark"] .faq-item{border-color:var(--border-color,#5d3040)!important}
+[data-theme="dark"] .faq-q{color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .code-example{background:var(--input-bg,#3d2030)!important;border-color:var(--border-color,#5d3040)!important;color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .section-title{color:#E8A020!important}
+@media(max-width:700px){.grid-3{grid-template-columns:1fr}.ach-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div id="nav-container"></div>
+<main>
+  <div class="hero-card">
+    <div class="hero-icon"><i class="fa-solid fa-coins"></i></div>
+    <div class="hero-title">Los DUNAB: Tu moneda universitaria</div>
+    <div class="hero-sub">Los DUNAB son la moneda virtual oficial de la UNAB. Representan tu participación, compromiso y actividad dentro de la vida universitaria. Acumularlos demuestra tu nivel de involucramiento con la universidad.</div>
+  </div>
+
+  <!-- Que son -->
+  <div class="card">
+    <div class="section-title"><i class="fa-solid fa-circle-question"></i> ¿Qué son los DUNAB?</div>
+    <p style="font-size:0.9rem;color:var(--text-secondary,#555);line-height:1.7;margin-bottom:20px">
+      <strong style="color:var(--text-primary,#1a1a1a)">DUNAB</strong> significa <strong style="color:#8B1A4A">Dinero UNAB</strong>. Son puntos-moneda virtuales que la Universidad Autónoma de Bucaramanga utiliza para incentivar la participación de los estudiantes en actividades academicas, deportivas y culturales.
+      <br><br>
+      Cada DUNAB que acumulas refleja una accion positiva dentro de la universidad: una compra en la cafeteria, asistir a un encuentro, cumplir una meta de ahorro, o simplemente estar activo en la plataforma.
+    </p>
+    <div class="grid-3">
+      <div class="info-box"><i class="fa-solid fa-coins"></i><h4>Son virtuales</h4><p>No son dinero real, pero representan tu actividad y compromiso universitario</p></div>
+      <div class="info-box"><i class="fa-solid fa-trophy"></i><h4>Se ganan haciendo</h4><p>Participando en encuentros, registrando actividades y alcanzando metas</p></div>
+      <div class="info-box"><i class="fa-solid fa-chart-line"></i><h4>Meta: 10.000 D</h4><p>El objetivo es acumular 10.000 DUNAB durante el periodo academico</p></div>
+    </div>
+  </div>
+
+  <!-- Como ganar DUNAB -->
+  <div class="card">
+    <div class="section-title"><i class="fa-solid fa-arrow-trend-up"></i> ¿Cómo ganar DUNAB?</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div><div class="step-title">Registra tus compras y actividades</div>
+        <div class="step-desc">Cada vez que hagas una compra o actividad autorizada en la UNAB, recibes un comprobante con un Código DUNAB</strong> (formato DNAB + numeros). Ingresas ese codigo en la plataforma y se registra el ingreso automáticamente.</div>
+        <div class="code-example"><i class="fa-solid fa-barcode" style="color:#8B1A4A"></i> Ejemplo de codigo: <strong>DNAB12345</strong></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div><div class="step-title">Participa en encuentros universitarios</div>
+        <div class="step-desc">La universidad organiza encuentros deportivos, academicos, culturales y tecnologicos. Inscribirte y registrar tu asistencia te da DUNAB directamente. Cada encuentro tiene una recompensa diferente (desde 50 hasta 800 DUNAB).</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div><div class="step-title">Cumple tus metas de ahorro</div>
+        <div class="step-desc">Define metas financieras personales dentro de la plataforma. Al completarlas desbloqueas logros especiales. Es una forma de demostrar disciplina financiera.</div></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div><div class="step-title">Bono de bienvenida</div>
+        <div class="step-desc">Al crear tu cuenta recibes automaticamente <strong>500 DUNAB</strong> como bono de bienvenida para que empieces tu recorrido.</div></div>
+    </div>
+  </div>
+
+  <!-- Logros -->
+  <div class="card">
+    <div class="section-title"><i class="fa-solid fa-medal"></i> Logros que puedes desbloquear</div>
+    <p style="font-size:0.83rem;color:var(--text-secondary,#777);margin-bottom:16px;line-height:1.5">Los logros se desbloquean automaticamente cuando cumples ciertos hitos. Aparecen en tu perfil como insignias de honor.</p>
+    <div class="ach-grid">
+      <div class="ach-box"><div class="ico"><i class="fa-solid fa-trophy"></i></div><div><h5>Primer Encuentro</h5><p>Registra tu primera actividad en un encuentro universitario</p></div></div>
+      <div class="ach-box"><div class="ico"><i class="fa-solid fa-coins"></i></div><div><h5>Millonario Universitario</h5><p>Acumula 1.000 DUNAB en tu cuenta</p></div></div>
+      <div class="ach-box"><div class="ico"><i class="fa-solid fa-star"></i></div><div><h5>Gran Ahorrador</h5><p>Llega a 5.000 DUNAB acumulados</p></div></div>
+      <div class="ach-box"><div class="ico"><i class="fa-solid fa-graduation-cap"></i></div><div><h5>Maestro del Ahorro</h5><p>Alcanza los 10.000 DUNAB — la meta completa</p></div></div>
+      <div class="ach-box"><div class="ico"><i class="fa-solid fa-bullseye"></i></div><div><h5>Primera Meta</h5><p>Completa tu primera meta de ahorro personal</p></div></div>
+      <div class="ach-box"><div class="ico"><i class="fa-solid fa-calendar"></i></div><div><h5>Un Mes Activo</h5><p>Mantente activo durante un mes completo</p></div></div>
+      <div class="ach-box"><div class="ico"><i class="fa-solid fa-money-bill-wave"></i></div><div><h5>Primer Movimiento</h5><p>Registra tu primera transaccion de DUNAB</p></div></div>
+      <div class="ach-box"><div class="ico"><i class="fa-solid fa-crown"></i></div><div><h5>Elite DUNAB</h5><p>Entra al Top 12 del ranking de estudiantes</p></div></div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="card">
+    <div class="section-title"><i class="fa-solid fa-comments"></i> Preguntas frecuentes</div>
+    <div class="faq-item">
+      <div class="faq-q"><i class="fa-solid fa-chevron-right"></i> Los DUNAB vencen o se pierden?</div>
+      <div class="faq-a">Los DUNAB acumulados durante el periodo academico permanecen en tu cuenta. El administrador puede ajustar saldos en casos especiales segun las politicas de la universidad.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><i class="fa-solid fa-chevron-right"></i> Puedo transferir DUNAB a otro estudiante?</div>
+      <div class="faq-a">Actualmente los DUNAB son personales e intransferibles. Solo los administradores pueden hacer ajustes masivos o individuales.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><i class="fa-solid fa-chevron-right"></i> Que pasa si ingreso un codigo incorrecto?</div>
+      <div class="faq-a">El sistema valida el formato del codigo (debe empezar por DNAB seguido de numeros). Si el codigo no es valido, el ingreso no se registrara. Verifica que el codigo de tu comprobante este correcto.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><i class="fa-solid fa-chevron-right"></i> Quien administra la plataforma?</div>
+      <div class="faq-a">La plataforma DUNAB es administrada por el equipo designado por la UNAB. El Administrador Principal tiene control total del sistema. Los administradores de soporte pueden ayudarte con problemas de acceso o contraseña.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q"><i class="fa-solid fa-chevron-right"></i> Olvide mi contraseña, que hago?</div>
+      <div class="faq-a">Contacta a un administrador DUNAB con tu codigo estudiantil. Ellos podran asignarte una contraseña temporal de forma segura. Proximamente habra verificacion directa por correo institucional.</div>
+    </div>
+  </div>
+</main>
+<script src="/theme.js"></script>
+<script src="/api.js"></script>
+<script src="/layout.js"></script>
+<script>
+async function init() {
+  const u = requireAuth(); if (!u) return;
+  const pr = await UserAPI.getProfile();
+  if (pr?.data) {
+    document.getElementById('header-container').innerHTML = renderHeader('Bienvenido, ' + pr.data.fullName.split(' ')[0], null, pr.data);
+    document.getElementById('nav-container').innerHTML = renderNav('about');
+    initTheme();
+  }
+}
+init();
+</script>
+</body>
+</html>

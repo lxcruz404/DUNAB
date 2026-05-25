@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<script>
+(function(){var t=localStorage.getItem('dunab_theme')||'light';document.documentElement.setAttribute('data-theme',t);var bg=t==='dark'?'#1a0a0f':'#8B1A4A';var card=t==='dark'?'#2d1520':'#fff';document.write('<style>html,body{background:'+bg+' !important}.ann-card{background:'+card+' !important}</style>');})();
+</script>
+<link rel="stylesheet" href="/theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>DUNAB - Anuncios</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh}
+main{padding:28px 36px;max-width:1000px;margin:0 auto}
+.page-title{color:#fff;font-size:1.4rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.page-sub{color:rgba(255,255,255,0.7);font-size:0.85rem;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.ann-card{background:#fff;border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s;border:2px solid transparent}
+.ann-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,0.2)}
+.ann-card.INFO{border-color:rgba(25,118,210,0.25)}
+.ann-card.WARNING{border-color:rgba(232,160,32,0.35)}
+.ann-card.SUCCESS{border-color:rgba(46,125,50,0.25)}
+.ann-card.URGENT{border-color:rgba(198,40,40,0.35)}
+.card-img{width:100%;height:150px;object-fit:cover;display:block}
+.card-img-placeholder{width:100%;height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem}
+.card-img-placeholder.INFO{background:#e3f2fd}
+.card-img-placeholder.WARNING{background:#fff8e6}
+.card-img-placeholder.SUCCESS{background:#e8f5e9}
+.card-img-placeholder.URGENT{background:#fde8e8}
+.card-body{padding:16px}
+.card-type{font-size:0.7rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.card-type.INFO{color:#1976d2}
+.card-type.WARNING{color:#E8A020}
+.card-type.SUCCESS{color:#2e7d32}
+.card-type.URGENT{color:#c62828}
+.card-title{font-size:0.95rem;font-weight:700;color:var(--text-primary,#1a1a1a);margin-bottom:6px;line-height:1.3}
+.card-excerpt{font-size:0.8rem;color:var(--text-secondary,#666);line-height:1.5;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.card-footer{padding:10px 16px;border-top:1px solid var(--border-color,#f0f0f0);display:flex;justify-content:space-between;align-items:center}
+.card-date{font-size:0.72rem;color:var(--text-secondary,#aaa)}
+.card-read{font-size:0.75rem;color:#8B1A4A;font-weight:600;display:flex;align-items:center;gap:4px}
+.empty{text-align:center;padding:60px 20px;color:rgba(255,255,255,0.6)}
+.empty i{font-size:3rem;margin-bottom:16px;display:block}
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;overflow-y:auto;padding:20px}
+.overlay.open{display:flex;align-items:flex-start;justify-content:center}
+.modal-box{background:#fff;border-radius:20px;width:100%;max-width:640px;overflow:hidden;margin:auto}
+.modal-img{width:100%;max-height:300px;object-fit:cover;display:block}
+.modal-body{padding:28px}
+.modal-type{font-size:0.75rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.modal-title{font-size:1.3rem;font-weight:800;color:#1a1a1a;margin-bottom:12px;line-height:1.3}
+.modal-content{font-size:0.9rem;color:#444;line-height:1.7}
+.modal-meta{margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:#aaa}
+.modal-close{background:#8B1A4A;border:none;border-radius:20px;color:#fff;padding:10px 24px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:0.85rem}
+/* Dark mode */
+[data-theme="dark"] .ann-card{background:var(--card-bg,#2d1520)!important}
+[data-theme="dark"] .card-title{color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .card-excerpt{color:var(--text-secondary,#a07080)!important}
+[data-theme="dark"] .card-footer{border-color:var(--border-color,#5d3040)!important}
+[data-theme="dark"] .modal-box{background:var(--card-bg,#2d1520)!important}
+[data-theme="dark"] .modal-title{color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .modal-content{color:var(--text-secondary,#c09090)!important}
+[data-theme="dark"] .modal-meta{border-color:var(--border-color,#5d3040)!important;color:#806070!important}
+[data-theme="dark"] .card-img-placeholder.INFO{background:rgba(25,118,210,0.1)}
+[data-theme="dark"] .card-img-placeholder.WARNING{background:rgba(232,160,32,0.1)}
+[data-theme="dark"] .card-img-placeholder.SUCCESS{background:rgba(46,125,50,0.1)}
+[data-theme="dark"] .card-img-placeholder.URGENT{background:rgba(198,40,40,0.1)}
+@media(max-width:600px){main{padding:20px 16px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div id="nav-container"></div>
+<main>
+  <div class="page-title"><i class="fa-solid fa-bullhorn"></i> Anuncios y Noticias</div>
+  <div class="page-sub">Información oficial de la UNAB y el sistema DUNAB</div>
+  <div class="grid" id="ann-grid">
+    <div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.6)">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem;margin-bottom:12px;display:block"></i>
+      Cargando anuncios...
+    </div>
+  </div>
+</main>
+
+<!-- Modal detail -->
+<div class="overlay" id="ann-overlay" onclick="closeAnn(event)">
+  <div class="modal-box" id="ann-modal">
+    <img id="modal-img" style="display:none" class="modal-img">
+    <div class="modal-body">
+      <div class="modal-type" id="modal-type"></div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-content" id="modal-content"></div>
+      <div class="modal-meta">
+        <span id="modal-date"></span>
+        <button class="modal-close" onclick="document.getElementById('ann-overlay').classList.remove('open')">
+          <i class="fa-solid fa-xmark"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/theme.js"></script>
+<script src="/api.js"></script>
+<script src="/layout.js"></script>
+<script>
+const typeConfig = {
+  INFO:    {icon:'fa-circle-info',    label:'Información',  color:'#1976d2'},
+  WARNING: {icon:'fa-triangle-exclamation', label:'Advertencia', color:'#E8A020'},
+  SUCCESS: {icon:'fa-circle-check',   label:'Aviso',        color:'#2e7d32'},
+  URGENT:  {icon:'fa-circle-exclamation',  label:'Urgente',      color:'#c62828'},
+};
+
+async function init() {
+  const u = requireAuth(); if (!u) return;
+  const pr = await UserAPI.getProfile();
+  if (pr?.data) {
+    document.getElementById('header-container').innerHTML = renderHeader('Bienvenido, ' + pr.data.fullName.split(' ')[0], null, pr.data);
+    document.getElementById('nav-container').innerHTML = renderNav('announcements');
+    initTheme();
+  }
+  await loadAnnouncements();
+}
+
+async function loadAnnouncements() {
+  const grid = document.getElementById('ann-grid');
+  try {
+    const res = await fetch('/api/announcements');
+    const data = await res.json();
+    const list = data?.data || [];
+
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+        <i class="fa-solid fa-inbox"></i>
+        <div style="font-size:1rem;font-weight:600;margin-bottom:8px">Sin anuncios activos</div>
+        <div style="font-size:0.85rem">Cuando los administradores publiquen anuncios, apareceran aqui.</div>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(a => {
+      const cfg = typeConfig[a.type] || typeConfig.INFO;
+      const imgHtml = a.imageUrl
+        ? `<img src="${a.imageUrl}" class="card-img" onerror="this.parentElement.innerHTML='<div class=card-img-placeholder ${a.type}><i class=fa-solid fa-${cfg.icon} style=color:${cfg.color}></i></div>'">`
+        : `<div class="card-img-placeholder ${a.type}"><i class="fa-solid ${cfg.icon}" style="color:${cfg.color}"></i></div>`;
+      return `
+      <div class="ann-card ${a.type}" onclick="openAnn(${JSON.stringify(a).replace(/"/g,'&quot;')})">
+        ${imgHtml}
+        <div class="card-body">
+          <div class="card-type ${a.type}"><i class="fa-solid ${cfg.icon}"></i> ${cfg.label}</div>
+          <div class="card-title">${a.title}</div>
+          <div class="card-excerpt">${a.content}</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-date">${UI.formatDate(a.createdAt)}</span>
+          <span class="card-read"><i class="fa-solid fa-arrow-right"></i> Leer mas</span>
+        </div>
+      </div>`;
+    }).join('');
+    initTheme();
+  } catch(e) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="fa-solid fa-circle-exclamation"></i><div>Error cargando anuncios</div></div>';
+  }
+}
+
+function openAnn(ann) {
+  const cfg = typeConfig[ann.type] || typeConfig.INFO;
+  const img = document.getElementById('modal-img');
+  if (ann.imageUrl) {
+    img.src = ann.imageUrl;
+    img.style.display = 'block';
+    img.onerror = () => { img.style.display = 'none'; };
+  } else {
+    img.style.display = 'none';
+  }
+  document.getElementById('modal-type').innerHTML = `<i class="fa-solid ${cfg.icon}" style="color:${cfg.color}"></i> <span style="color:${cfg.color}">${cfg.label}</span>`;
+  document.getElementById('modal-title').textContent = ann.title;
+  document.getElementById('modal-content').textContent = ann.content;
+  document.getElementById('modal-date').textContent = 'Publicado: ' + UI.formatDate(ann.createdAt);
+  document.getElementById('ann-overlay').classList.add('open');
+}
+
+function closeAnn(e) {
+  if (e.target === document.getElementById('ann-overlay')) {
+    document.getElementById('ann-overlay').classList.remove('open');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+/* ===== DUNAB THEME SYSTEM ===== */
+:root {
+  --bg-main: #8B1A4A;
+  --card-bg: #ffffff;
+  --header-bg: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --text-muted: #888888;
+  --input-bg: #f0f0f0;
+  --border-color: #e0e0e0;
+  --table-header: #f5f5f5;
+  --enc-type-bg: #fde8f5;
+  --enc-type-color: #8B1A4A;
+  --item-border: #eeeeee;
+}
+
+[data-theme="dark"] {
+  --bg-main: #1a0a0f;
+  --card-bg: #2d1520;
+  --header-bg: #2d1520;
+  --text-primary: #f0e6ea;
+  --text-secondary: #c09090;
+  --text-muted: #a07080;
+  --input-bg: #3d2030;
+  --border-color: #5d3040;
+  --table-header: #3d2030;
+  --enc-type-bg: #5d3040;
+  --enc-type-color: #f0c0d0;
+  --item-border: #5d3040;
+}
+
+/* ===== APLICAR VARIABLES A TODOS LOS ELEMENTOS ===== */
+body { background: var(--bg-main) !important; }
+
+.card, .modal-box {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.enc-item, .goal-item, .rank-item, .shortcut {
+  background: var(--card-bg) !important;
+  border-color: var(--item-border) !important;
+  color: var(--text-primary) !important;
+}
+
+#main-header { background: var(--header-bg) !important; }
+
+/* Textos */
+.card-title, .card-sub, .section-title,
+.shortcut-name, .rank-name, .goal-name,
+.ach-name, .user-name, .enc-info .title,
+.prog-title, .info-item .lbl, .info-item .val,
+.contact-item, .prog-text, .result-avg,
+.account-career, .account-code {
+  color: var(--text-primary) !important;
+}
+
+.card-sub, .account-career, .enc-info .meta,
+.goal-amount, .shortcut-desc, .ach-desc,
+.rank-detail, .goal-status, .user-career,
+.text-secondary, .lbl, .result-status {
+  color: var(--text-secondary) !important;
+}
+
+/* Inputs y selects */
+input:not([type=submit]):not([type=button]):not([type=range]),
+select, textarea {
+  background: var(--input-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Tabla */
+.tx-table th {
+  background: var(--table-header) !important;
+  color: var(--text-secondary) !important;
+}
+.tx-table td {
+  color: var(--text-primary) !important;
+  border-color: var(--item-border) !important;
+}
+.tx-table tr:hover td {
+  background: var(--input-bg) !important;
+}
+
+/* Etiquetas de encuentros */
+.enc-type {
+  background: var(--enc-type-bg) !important;
+  color: var(--enc-type-color) !important;
+}
+
+/* Títulos de encuentros */
+.enc-info .title { color: var(--text-primary) !important; }
+.enc-info .meta { color: var(--text-secondary) !important; }
+
+/* Shortcuts */
+.shortcut-desc { color: var(--text-secondary) !important; }
+
+/* Logros */
+.ach-date { color: var(--text-muted) !important; }
+
+/* Botón tema */
+#theme-btn {
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  background: var(--input-bg) !important;
+}
+
+/* Contact box */
+.contact-box { border-color: var(--item-border) !important; }
+.contact-title { color: #E8A020 !important; }
+
+/* Separadores */
+.ach-item, .tx-table tr, .rank-item {
+  border-color: var(--item-border) !important;
+}
+
+/* Progress bar track */
+.prog-bar, .progress-bar {
+  background: var(--input-bg) !important;
+}
+
+/* Form groups label */
+.form-group label { color: var(--text-primary) !important; }
+
+/* Tabla encabezado en modo oscuro */
+thead { background: var(--table-header) !important; }
+
+/* Números de progreso DUNAB */
+[data-theme="dark"] .prog-item .num,
+[data-theme="dark"] .dunab-balance,
+[data-theme="dark"] .prog-faltantes,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .account-code,
+[data-theme="dark"] .form-group label,
+[data-theme="dark"] .type-btn,
+[data-theme="dark"] td,
+[data-theme="dark"] .badge.ingreso,
+[data-theme="dark"] .badge.gasto {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .badge.ingreso {
+  background: #1a3d2a !important;
+  color: #4CAF50 !important;
+}
+
+[data-theme="dark"] .badge.gasto {
+  background: #3d1a1a !important;
+  color: #ef5350 !important;
+}
+
+[data-theme="dark"] .type-btn {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] thead tr {
+  background: var(--table-header) !important;
+}

@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DUNAB - Panel Administrador</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── Theme variables ── */
+:root{
+  --bg:#1a0a0f;--sidebar-bg:#2d1520;--card-bg:#2d1520;
+  --border:rgba(139,26,74,0.25);--text:#f0e6ea;--sub:#a07080;
+  --input-bg:#3d2030;--hover:rgba(139,26,74,0.15);
+  --table-head:rgba(139,26,74,0.15);--row-hover:rgba(139,26,74,0.08);
+}
+[data-theme="light"]{
+  --bg:#f5f0f2;--sidebar-bg:#fff;--card-bg:#fff;
+  --border:rgba(139,26,74,0.15);--text:#1a1a1a;--sub:#666;
+  --input-bg:#f5f0f2;--hover:rgba(139,26,74,0.06);
+  --table-head:#f5f0f2;--row-hover:#faf5f7;
+}
+*{margin:0;padding:0;box-sizing:border-box;transition:background 0.2s,color 0.2s,border-color 0.2s}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+/* ── Layout ── */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100}
+.sb-logo{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-logo img{height:36px;object-fit:contain}
+.sb-logo .badge{font-size:0.65rem;color:#f0c0d0;background:rgba(139,26,74,0.3);padding:2px 8px;border-radius:8px;white-space:nowrap}
+.sb-user{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-avatar{width:38px;height:38px;border-radius:50%;border:2px solid #8B1A4A;object-fit:cover;flex-shrink:0}
+.sb-name{font-size:0.85rem;font-weight:600;color:var(--text);line-height:1.2}
+.sb-rank{font-size:0.7rem;color:#E8A020;font-weight:600}
+.sb-nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav-section{padding:12px 20px 4px;font-size:0.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--sub);cursor:pointer;transition:all 0.15s;font-size:0.85rem;border:none;background:none;width:100%;text-align:left;border-left:3px solid transparent}
+.nav-item:hover{background:var(--hover);color:var(--text)}
+.nav-item.active{background:var(--hover);color:#8B1A4A;border-left-color:#8B1A4A;font-weight:600}
+.nav-item .ico{font-size:1rem;width:18px;text-align:center;flex-shrink:0}
+.sb-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.theme-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:0.8rem;color:var(--text)}
+.btn-logout{padding:9px;background:rgba(139,26,74,0.1);border:1px solid var(--border);border-radius:10px;color:#c09090;cursor:pointer;font-size:0.8rem;font-weight:600;width:100%}
+.btn-logout:hover{background:rgba(139,26,74,0.25)}
+/* ── Main ── */
+.main{flex:1;margin-left:240px;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--sidebar-bg);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:1.05rem;font-weight:700;color:var(--text)}
+.topbar-sub{font-size:0.75rem;color:var(--sub);margin-top:2px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.page{display:none;padding:24px 28px;flex:1}
+.page.active{display:block}
+/* ── Cards ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:18px}
+.stat-icon{font-size:1.6rem;margin-bottom:8px}
+.stat-num{font-size:1.8rem;font-weight:800;color:var(--text);line-height:1}
+.stat-lbl{font-size:0.72rem;color:var(--sub);text-transform:uppercase;letter-spacing:0.3px;margin-top:4px}
+.stat-sub{font-size:0.75rem;color:#E8A020;margin-top:4px}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.chart-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px}
+.chart-title{font-size:0.88rem;font-weight:700;color:#8B1A4A;margin-bottom:14px}
+.chart-wrap{position:relative;height:210px}
+/* ── Table card ── */
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px}
+.card-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-head-title{font-size:0.9rem;font-weight:700;color:#8B1A4A}
+table{width:100%;border-collapse:collapse;font-size:0.82rem}
+th{text-align:left;padding:10px 16px;background:var(--table-head);color:var(--sub);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.3px}
+td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--row-hover)}
+/* ── Badges ── */
+.badge{padding:3px 9px;border-radius:8px;font-size:0.7rem;font-weight:600;display:inline-block}
+.badge-admin{background:rgba(139,26,74,0.15);color:#8B1A4A}
+.badge-student{background:rgba(46,125,50,0.15);color:#2e7d32}
+.badge-PRINCIPAL{background:rgba(232,160,32,0.15);color:#E8A020}
+.badge-REGULAR{background:rgba(139,26,74,0.12);color:#8B1A4A}
+.badge-ACTIVO{background:rgba(46,125,50,0.15);color:#2e7d32}
+.badge-CERRADO,.badge-FINALIZADO{background:rgba(100,100,100,0.15);color:#888}
+.badge-CANCELADO{background:rgba(198,40,40,0.12);color:#c62828}
+/* ── Buttons ── */
+.btn-primary{background:#8B1A4A;border:none;border-radius:20px;color:#fff;padding:9px 18px;font-weight:600;cursor:pointer;font-size:0.82rem}
+.btn-primary:hover{background:#a02060}
+.btn-warn{background:rgba(232,160,32,0.12);border:1px solid rgba(232,160,32,0.3);border-radius:20px;color:#E8A020;padding:9px 18px;font-weight:600;cursor:pointer;font-size:0.82rem}
+.action-btns{display:flex;gap:5px;flex-wrap:wrap}
+.btn-sm{padding:4px 10px;border-radius:8px;border:none;cursor:pointer;font-size:0.73rem;font-weight:600}
+.btn-view{background:rgba(33,150,243,0.12);color:#1976d2}
+.btn-edit{background:rgba(232,160,32,0.12);color:#E8A020}
+.btn-del{background:rgba(198,40,40,0.12);color:#c62828}
+.btn-sm:hover{opacity:0.75}
+/* ── Toolbar ── */
+.toolbar{display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.search-input{padding:9px 14px;border:1px solid var(--border);border-radius:10px;font-size:0.85rem;outline:none;flex:1;min-width:200px;background:var(--input-bg);color:var(--text)}
+.search-input::placeholder{color:var(--sub)}
+.search-input:focus{border-color:#8B1A4A}
+/* ── Avatar ── */
+.av-sm{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,26,74,0.4)}
+/* ── Modal ── */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-box{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:26px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-size:1rem;font-weight:700;color:#8B1A4A}
+.btn-close{background:none;border:none;color:var(--sub);cursor:pointer;font-size:1.1rem}
+.form-group{margin-bottom:13px}
+.form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--sub);margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;outline:none;font-family:inherit}
+.form-group input:focus,.form-group select:focus{border-color:#8B1A4A}
+.form-group select option{background:var(--card-bg);color:var(--text)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-actions{display:flex;gap:10px;margin-top:16px}
+.btn-cancel{flex:1;padding:10px;background:var(--input-bg);border:1px solid var(--border);border-radius:20px;color:var(--sub);cursor:pointer;font-weight:600}
+.btn-save{flex:2;padding:10px;background:#8B1A4A;border:none;border-radius:20px;color:#fff;font-weight:700;cursor:pointer}
+/* ── Detail modal ── */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.d-lbl{font-size:0.7rem;color:var(--sub);margin-bottom:2px}
+.d-val{font-size:0.88rem;font-weight:600;color:var(--text)}
+.section-sub{font-size:0.82rem;font-weight:700;color:#8B1A4A;margin:14px 0 8px}
+.tx-mini{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.8rem;color:var(--text)}
+/* ── Announcement ── */
+.ann-item{padding:14px;border:1px solid var(--border);border-radius:10px;margin-bottom:10px;background:var(--card-bg)}
+.ann-type-INFO{border-left:4px solid #2196F3}
+.ann-type-WARNING{border-left:4px solid #E8A020}
+.ann-type-SUCCESS{border-left:4px solid #4CAF50}
+.ann-type-URGENT{border-left:4px solid #dc3545}
+/* ── Empty ── */
+.empty{text-align:center;padding:28px;color:var(--sub);font-size:0.85rem}
+/* ── Top list ── */
+.top-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.top-item:last-child{border-bottom:none}
+.top-pos{width:22px;text-align:center;font-weight:800;color:#E8A020;font-size:0.88rem}
+.top-name{flex:1;font-size:0.83rem;color:var(--text)}
+.top-bal{font-size:0.85rem;font-weight:700;color:#E8A020}
+/* ── Responsive ── */
+@media(max-width:900px){
+  .sidebar{width:56px}.sb-logo .badge,.sb-name,.sb-rank,.nav-item span:not(.ico),.nav-section,.sb-foot .theme-toggle span{display:none}
+  .main{margin-left:56px}.stats-row{grid-template-columns:1fr 1fr}.charts-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ─ SIDEBAR ─ -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <img src="/logo-unab.png" onerror="this.style.display='none'">
+      <span class="badge">PANEL ADMIN</span>
+    </div>
+    <div class="sb-user">
+      <img id="sb-avatar" class="sb-avatar" src="https://ui-avatars.com/api/?name=A&background=8B1A4A&color=fff">
+      <div><div class="sb-name" id="sb-name">Admin</div><div class="sb-rank" id="sb-rank">Cargando...</div></div>
+    </div>
+    <div class="sb-nav">
+      <div class="nav-section">General</div>
+      <button class="nav-item active" onclick="showPage('stats',this)"><span class="ico"><i class="fa-solid fa-chart-bar"></i></span><span>Estadísticas</span></button>
+      <div class="nav-section">Gestión</div>
+      <button class="nav-item" onclick="showPage('students',this)"><span class="ico"><i class="fa-solid fa-user-graduate"></i></span><span>Estudiantes</span></button>
+      <button class="nav-item" onclick="showPage('admins',this)"><span class="ico"><i class="fa-solid fa-users-gear"></i></span><span>Administradores</span></button>
+      <button class="nav-item" onclick="showPage('encounters',this)"><span class="ico"><i class="fa-solid fa-trophy"></i></span><span>Encuentros</span></button>
+      <button class="nav-item" onclick="showPage('announcements',this)"><span class="ico"><i class="fa-solid fa-bullhorn"></i></span><span>Anuncios</span></button>
+      <button class="nav-item" onclick="showPage('dunab-masivo',this)"><span class="ico"><i class="fa-solid fa-money-bill-wave"></i></span><span>DUNAB Masivo</span></button>
+      <button class="nav-item" id="nav-chat-btn" onclick="showPage('chat',this)"><span class="ico"><i class="fa-solid fa-comments"></i></span><span>Soporte Chat <span id="chat-badge" style="display:none;background:#dc3545;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.68rem;font-weight:700;margin-left:2px">0</span></span></button>
+      <div class="nav-section">Mi Cuenta</div>
+      <button class="nav-item" onclick="showPage('my-profile',this)"><span class="ico"><i class="fa-solid fa-circle-user"></i></span><span>Mi Perfil</span></button>
+      <div class="nav-section" id="principal-section" style="display:none">Admin Principal</div>
+      <button class="nav-item" id="transfer-btn" onclick="showPage('transfer',this)" style="display:none"><span class="ico"><i class="fa-solid fa-crown"></i></span><span>Transferir Cargo</span></button>
+    </div>
+    <div class="sb-foot">
+      <div class="theme-toggle" onclick="toggleAdminTheme()">
+        <span id="theme-icon"><i class="fa-solid fa-moon"></i></span><span> Cambiar tema</span>
+      </div>
+      <button class="btn-logout" onclick="Auth.logout()">← Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- ─ MAIN ─ -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="page-title">Estadísticas del Sistema</div>
+        <div class="topbar-sub" id="page-sub">Visión general — actualiza cada 60s</div>
+      </div>
+      <div class="topbar-actions">
+        <button onclick="refreshAll()" style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:7px 14px;color:var(--text);cursor:pointer;font-size:0.78rem"><i class="fa-solid fa-rotate"></i> Actualizar</button>
+
+      </div>
+    </div>
+
+    <!-- ── Estadísticas ── -->
+    <div class="page active" id="page-stats">
+      <div class="stats-row" id="stats-cards"></div>
+      <div class="charts-row">
+        <div class="chart-card"><div class="chart-title"><i class="fa-solid fa-chart-bar"></i> Distribución de saldos DUNAB</div><div class="chart-wrap"><canvas id="ch-balance"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title"><i class="fa-solid fa-trophy"></i> Encuentros por tipo</div><div class="chart-wrap"><canvas id="ch-enc"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title"><i class="fa-solid fa-graduation-cap"></i> Estudiantes por carrera</div><div class="chart-wrap"><canvas id="ch-career"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title"><i class="fa-solid fa-crown" style="color:#E8A020"></i> Top 5 — Mayor saldo DUNAB</div><div id="top5" style="padding-top:6px"></div></div>
+      </div>
+    </div>
+
+    <!-- ── Estudiantes ── -->
+    <div class="page" id="page-students">
+      <div class="toolbar">
+        <input class="search-input" id="q-students" placeholder="Buscar estudiante..." oninput="filterStudents()">
+        <button class="btn-warn" onclick="exportPDF('students')"><i class="fa-solid fa-file-pdf"></i> Exportar PDF</button>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-head-title">Listado de Estudiantes</div><div id="students-count" style="font-size:0.78rem;color:var(--sub)"></div></div>
+        <table><thead><tr><th>Estudiante</th><th>Código</th><th>Carrera</th><th>Saldo DUNAB</th><th>Último acceso</th><th>Acciones</th></tr></thead>
+        <tbody id="t-students"><tr><td colspan="6" class="empty">Cargando...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- ── Administradores ── -->
+    <div class="page" id="page-admins">
+      <div class="toolbar">
+        <span style="font-weight:600;color:#8B1A4A">Equipo Administrativo DUNAB</span>
+        <button class="btn-primary" id="btn-new-admin" onclick="checkAndOpenAdminModal()">+ Nuevo Administrador</button>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-head-title">Administradores registrados</div></div>
+        <table><thead><tr><th>Administrador</th><th>Email</th><th>Código</th><th>Rango</th><th>Último acceso</th><th>Acciones</th></tr></thead>
+        <tbody id="t-admins"><tr><td colspan="6" class="empty">Cargando...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- ── Encuentros ── -->
+    <div class="page" id="page-encounters">
+      <div class="toolbar">
+        <span style="font-weight:600;color:#8B1A4A">Gestión de Encuentros Universitarios</span>
+        <button class="btn-primary" onclick="openModal('modal-enc')">+ Nuevo Encuentro</button>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-head-title">Todos los encuentros</div></div>
+        <table><thead><tr><th>Título</th><th>Tipo</th><th>Fecha</th><th>Recompensa</th><th>Inscritos</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="t-enc"><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- ── Anuncios ── -->
+    <div class="page" id="page-announcements">
+      <div class="toolbar">
+        <span style="font-weight:600;color:#8B1A4A">Anuncios para Estudiantes</span>
+        <button class="btn-primary" onclick="openModal('modal-ann')">+ Nuevo Anuncio</button>
+      </div>
+      <div id="ann-list"><div class="empty">Cargando anuncios...</div></div>
+    </div>
+
+    <!-- ── DUNAB Masivo ── -->
+    <div class="page" id="page-dunab-masivo">
+      <div class="card" style="max-width:600px">
+        <div class="card-head"><div class="card-head-title"><i class="fa-solid fa-money-bill-wave"></i> Dar DUNAB a todos los estudiantes</div></div>
+        <div style="padding:20px">
+          <p style="color:var(--sub);font-size:0.85rem;margin-bottom:18px;line-height:1.6">Esta acción dará o quitará DUNAB a <strong>todos</strong> los estudiantes activos al mismo tiempo. Úsala para premios masivos, eventos especiales o correcciones globales.</p>
+          <div class="form-group"><label>Monto por estudiante (positivo = dar, negativo = quitar)</label><input type="number" id="mass-amount" placeholder="Ej: 100 o -50" step="0.01"></div>
+          <div class="form-group"><label>Motivo</label><input type="text" id="mass-reason" placeholder="Ej: Premio por semana cultural, Ajuste semestral..."></div>
+          <div style="background:rgba(232,160,32,0.08);border:1px solid rgba(232,160,32,0.2);border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.82rem;color:#c09050">
+            <i class="fa-solid fa-triangle-exclamation"></i> Esta acción afectará a <strong id="total-students-count">todos los estudiantes</strong> y no se puede deshacer fácilmente.
+          </div>
+          <button class="btn-primary" onclick="applyMassDunab()">Aplicar a todos los estudiantes</button>
+        </div>
+      </div>
+      <div class="card" style="max-width:600px;margin-top:0">
+        <div class="card-head"><div class="card-head-title"><i class="fa-solid fa-bullseye"></i> Dar DUNAB a un estudiante específico</div></div>
+        <div style="padding:20px">
+          <div class="form-group">
+            <label>Seleccionar estudiante</label>
+            <select id="single-student"><option value="">Seleccionar...</option></select>
+          </div>
+          <div class="form-group"><label>Monto</label><input type="number" id="single-amount" placeholder="Ej: 200" step="0.01"></div>
+          <div class="form-group"><label>Motivo</label><input type="text" id="single-reason" placeholder="Ej: Premio especial, Corrección..."></div>
+          <button class="btn-primary" onclick="applySingleDunab()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Mi Perfil ── -->
+    <div class="page" id="page-my-profile">
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;max-width:900px">
+        <div class="card" style="overflow:hidden">
+          <div style="background:#8B1A4A;height:80px"></div>
+          <div style="padding:0 20px 20px;text-align:center;margin-top:-40px">
+            <div style="position:relative;display:inline-block">
+              <img id="mp-avatar" src="" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--card-bg);object-fit:cover;cursor:pointer" onclick="document.getElementById('mp-photo-input').click()">
+              <div style="position:absolute;bottom:0;right:0;background:#8B1A4A;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--card-bg)" onclick="document.getElementById('mp-photo-input').click()">
+                <i class="fa-solid fa-camera" style="color:#fff;font-size:0.65rem"></i>
+              </div>
+            </div>
+            <input type="file" id="mp-photo-input" accept="image/*" style="display:none" onchange="uploadAdminPhoto(this)">
+            <div style="font-size:1rem;font-weight:700;margin-top:8px" id="mp-name">-</div>
+            <div style="font-size:0.75rem;color:var(--sub)" id="mp-email">-</div>
+            <span class="badge badge-PRINCIPAL" id="mp-rank-badge" style="margin-top:6px">-</span>
+          </div>
+          <div style="padding:0 20px 20px;border-top:1px solid var(--border)">
+            <div style="margin-top:14px">
+              <div class="d-lbl">Código</div><div class="d-val" id="mp-code">-</div>
+            </div>
+            <div style="margin-top:10px">
+              <div class="d-lbl">Rango</div><div class="d-val" id="mp-rank">-</div>
+            </div>
+            <div style="margin-top:10px">
+              <div class="d-lbl">Miembro desde</div><div class="d-val" id="mp-since">-</div>
+            </div>
+            <div style="margin-top:10px">
+              <div class="d-lbl">Último acceso</div><div class="d-val" id="mp-last">-</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:20px">
+            <div class="card-head"><div class="card-head-title"><i class="fa-solid fa-pen-to-square"></i> Editar Perfil</div></div>
+            <div style="padding:20px">
+              <div class="form-group"><label>Nombre completo</label><input type="text" id="mp-edit-name" placeholder="Tu nombre"></div>
+              <div class="form-group"><label>Carrera / Área</label><input type="text" id="mp-edit-career" placeholder="Ej: Sistemas"></div>
+              <button class="btn-primary" onclick="saveMyProfile()">Guardar cambios</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-head-title"><i class="fa-solid fa-key"></i> Cambiar mi Contraseña</div></div>
+            <div style="padding:20px">
+              <div class="form-group"><label>Nueva contraseña (mín. 6 caracteres)</label><input type="password" id="mp-pass" placeholder="Nueva contraseña"></div>
+              <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="mp-pass2" placeholder="Repite la contraseña"></div>
+              <button class="btn-primary" onclick="changeMyPass()">Cambiar contraseña</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Chat ── -->
+    <div class="page" id="page-chat">
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;height:calc(100vh - 180px)">
+        <!-- Conversation list -->
+        <div style="background:var(--card-bg);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border)">
+          <div style="display:flex;border-bottom:1px solid var(--border)">
+            <button id="tab-my-chats" onclick="switchChatTab(false)" style="flex:1;padding:10px;background:#8B1A4A;color:#fff;border:none;cursor:pointer;font-size:0.78rem;font-weight:600">Mis Chats</button>
+            <button id="tab-all-chats" onclick="switchChatTab(true)" style="flex:1;padding:10px;background:transparent;color:var(--sub);border:none;cursor:pointer;font-size:0.78rem;font-weight:600">Todos los Chats</button>
+          </div>
+          <div id="conv-list" style="flex:1;overflow-y:auto;padding:8px"></div>
+        </div>
+        <!-- Chat window -->
+        <div style="background:var(--card-bg);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border)" id="chat-window">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--sub);text-align:center;padding:40px">
+            <div>
+              <i class="fa-solid fa-comment-dots" style="font-size:2.5rem;color:rgba(139,26,74,0.2);display:block;margin-bottom:14px"></i>
+              Selecciona una conversacion para ver los mensajes
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Transferir ── -->
+    <div class="page" id="page-transfer">
+      <div class="card" style="max-width:540px">
+        <div class="card-head"><div class="card-head-title"><i class="fa-solid fa-crown" style="color:#E8A020"></i> Transferir Cargo de Admin Principal</div></div>
+        <div style="padding:20px">
+          <p style="color:var(--sub);font-size:0.85rem;margin-bottom:16px;line-height:1.6">Al transferir el cargo, perderás tus privilegios de Admin Principal y pasarán al administrador seleccionado. Esta acción es inmediata.</p>
+          <div class="form-group"><label>Nuevo Admin Principal</label><select id="transfer-target"><option value="">Seleccionar administrador...</option></select></div>
+          <div style="background:rgba(232,160,32,0.08);border:1px solid rgba(232,160,32,0.2);border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.8rem;color:#c09050"><i class="fa-solid fa-triangle-exclamation"></i> Solo el nuevo Admin Principal podrá revertir este cambio.</div>
+          <button class="btn-primary" style="background:#E8A020" onclick="doTransfer()">Transferir cargo →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODALS ─── -->
+<!-- Detalle usuario -->
+<div class="modal" id="modal-user">
+  <div class="modal-box">
+    <div class="modal-head"><div class="modal-title" id="modal-user-title">Detalle</div><button class="btn-close" onclick="closeModal('modal-user')">×</button></div>
+    <div id="modal-user-body"></div>
+  </div>
+</div>
+<!-- Ajustar saldo -->
+<div class="modal" id="modal-balance">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-head"><div class="modal-title"><i class="fa-solid fa-coins"></i> Ajustar Saldo</div><button class="btn-close" onclick="closeModal('modal-balance')">×</button></div>
+    <div id="modal-balance-name" style="color:#E8A020;font-weight:600;margin-bottom:14px"></div>
+    <div class="form-group"><label>Monto (+ agregar / - quitar)</label><input type="number" id="bal-amount" placeholder="Ej: 500 o -200" step="0.01"></div>
+    <div class="form-group"><label>Motivo</label><input type="text" id="bal-reason" placeholder="Premio, corrección..."></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('modal-balance')">Cancelar</button><button class="btn-save" onclick="applyBalance()">Aplicar</button></div>
+  </div>
+</div>
+<!-- Nuevo admin -->
+<div class="modal" id="modal-admin">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-head"><div class="modal-title"><i class="fa-solid fa-user-plus"></i> Nuevo Administrador</div><button class="btn-close" onclick="closeModal('modal-admin')">×</button></div>
+    <div class="form-group"><label>Nombre completo *</label><input type="text" id="adm-name" placeholder="Nombre completo"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Email *</label><input type="email" id="adm-email" placeholder="admin@unab.edu.co"></div>
+      <div class="form-group"><label>Código *</label><input type="text" id="adm-code" placeholder="ADM002"></div>
+    </div>
+    <div class="form-group"><label>Contraseña *</label><input type="password" id="adm-pass" placeholder="Mín. 6 caracteres"></div>
+    <div class="form-group"><label>Rango</label>
+      <select id="adm-rank"><option value="REGULAR">Regular — permisos básicos</option><option value="PRINCIPAL">Principal — permisos totales</option><option value="SUPPORT">Soporte — atiende estudiantes</option></select>
+    </div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('modal-admin')">Cancelar</button><button class="btn-save" onclick="createAdmin()">Crear administrador</button></div>
+  </div>
+</div>
+<!-- Reset contraseña -->
+<div class="modal" id="modal-reset-pass">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-head"><div class="modal-title"><i class="fa-solid fa-key"></i> Restablecer Contraseña</div><button class="btn-close" onclick="closeModal('modal-reset-pass')">×</button></div>
+    <div id="reset-pass-name" style="color:#8B1A4A;font-weight:600;margin-bottom:14px"></div>
+    <p style="color:var(--sub);font-size:0.82rem;margin-bottom:14px;line-height:1.5">El estudiante podrá ingresar con esta nueva contraseña. Notifícasela por otro medio.</p>
+    <div class="form-group"><label>Nueva contraseña (mín. 6 caracteres)</label><div style="position:relative"><input type="password" id="new-pass" placeholder="Nueva contraseña" style="width:100%;padding-right:44px"><button type="button" onclick="toggleAdminEye('eye-reset-pass')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--sub);padding:4px"><i id="eye-reset-pass" class="fa-solid fa-eye"></i></button></div></div>
+    <div style="background:rgba(232,160,32,0.08);border:1px solid rgba(232,160,32,0.15);border-radius:8px;padding:10px;font-size:0.78rem;color:#c09050;margin-bottom:12px"><i class="fa-solid fa-triangle-exclamation"></i> La contraseña anterior quedará inactiva inmediatamente.</div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('modal-reset-pass')">Cancelar</button><button class="btn-save" onclick="applyResetPass()">Restablecer</button></div>
+  </div>
+</div>
+<!-- Nuevo encuentro -->
+<div class="modal" id="modal-enc">
+  <div class="modal-box">
+    <div class="modal-head"><div class="modal-title"><i class="fa-solid fa-plus"></i> Nuevo Encuentro</div><button class="btn-close" onclick="closeModal('modal-enc')">×</button></div>
+    <div class="form-group"><label>Título *</label><input type="text" id="enc-title" placeholder="Ej: Torneo de Fútbol UNAB"></div>
+    <div class="form-group"><label>Descripción</label><textarea id="enc-desc" rows="2" style="width:100%;padding:9px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:0.88rem;resize:vertical"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Tipo</label>
+        <select id="enc-type"><option value="DEPORTIVO"><i class="fa-solid fa-futbol"></i> Deportivo</option><option value="ACADEMICO"><i class="fa-solid fa-book"></i> Académico</option><option value="CULTURAL"><i class="fa-solid fa-masks-theater"></i> Cultural</option><option value="TECNOLOGICO"><i class="fa-solid fa-laptop-code"></i> Tecnológico</option><option value="SOCIAL"><i class="fa-solid fa-handshake"></i> Social</option></select>
+      </div>
+      <div class="form-group"><label>Ubicación</label><input type="text" id="enc-loc" placeholder="Cancha Principal"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Fecha y hora *</label><input type="datetime-local" id="enc-date"></div>
+      <div class="form-group"><label>Recompensa DUNAB *</label><input type="number" id="enc-reward" placeholder="200" min="1"></div>
+    </div>
+    <div class="form-group"><label>Cupos máximos (vacío = ilimitado)</label><input type="number" id="enc-max" placeholder="50" min="1"></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('modal-enc')">Cancelar</button><button class="btn-save" onclick="createEncounter()">Crear</button></div>
+  </div>
+</div>
+<!-- Editar rango admin -->
+<div class="modal" id="modal-edit-rank">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-head"><div class="modal-title">Editar Rango</div><button class="btn-close" onclick="closeModal('modal-edit-rank')">×</button></div>
+    <div id="edit-rank-name" style="color:#8B1A4A;font-weight:600;margin-bottom:14px"></div>
+    <div class="form-group">
+      <label>Nuevo rango</label>
+      <select id="edit-rank-select">
+        <option value="SUPPORT">Soporte — atiende estudiantes</option>
+        <option value="REGULAR">Regular — permisos basicos</option>
+        <option value="PRINCIPAL">Principal — permisos totales</option>
+      </select>
+    </div>
+    <div style="background:rgba(232,160,32,0.08);border:1px solid rgba(232,160,32,0.15);border-radius:8px;padding:10px;font-size:0.78rem;color:#c09050;margin-bottom:12px"><i class="fa-solid fa-triangle-exclamation"></i> Si asignas el rango Principal a otro admin, ese admin tendrá todos tus privilegios.</div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('modal-edit-rank')">Cancelar</button><button class="btn-save" onclick="applyEditRank()">Guardar cambio</button></div>
+  </div>
+</div>
+<!-- Nuevo anuncio -->
+<div class="modal" id="modal-ann">
+  <div class="modal-box" style="max-width:500px">
+    <div class="modal-head"><div class="modal-title"><i class="fa-solid fa-bullhorn"></i> Nuevo Anuncio</div><button class="btn-close" onclick="closeModal('modal-ann')">×</button></div>
+    <div class="form-group"><label>Titulo *</label><input type="text" id="ann-title" placeholder="Titulo del anuncio"></div>
+    <div class="form-group"><label>Contenido *</label><textarea id="ann-content" rows="3" style="width:100%;padding:9px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:0.88rem;resize:vertical" placeholder="Texto del anuncio..."></textarea></div>
+    <div class="form-group">
+      <label><i class="fa-solid fa-image" style="color:#8B1A4A;margin-right:4px"></i> Imagen (opcional)</label>
+      <input type="file" id="ann-image" accept="image/*" style="width:100%;padding:8px;border:1px dashed var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);cursor:pointer" onchange="previewAnnImage(this)">
+      <img id="ann-image-preview" style="display:none;width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:8px;border:1px solid var(--border)">
+    </div>
+    <div style="display:flex;gap:12px">
+      <div class="form-group" style="flex:1"><label>Tipo</label>
+        <select id="ann-type">
+          <option value="INFO">Información</option>
+          <option value="WARNING">Advertencia</option>
+          <option value="SUCCESS">Aviso positivo</option>
+          <option value="URGENT">Urgente</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1"><label>Expira (opcional)</label><input type="date" id="ann-expires"></div>
+    </div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('modal-ann')">Cancelar</button><button class="btn-save" onclick="createAnn()"><i class="fa-solid fa-bullhorn"></i> Publicar</button></div>
+  </div>
+</div>
+
+<script src="/api.js"></script>
+<script>
+// ── Admin API ──────────────────────────────────────────────
+const A = {
+  stats:     ()  => apiRequest('/admin/stats'),
+  users:     (q,r)=> apiRequest('/admin/users'+(q||r?'?'+(q?'search='+encodeURIComponent(q):'')+(r?'&role='+r:''):'')),
+  userDetail:(id)=> apiRequest('/admin/users/'+id),
+  createAdmin:(d)=> apiRequest('/admin/users',{method:'POST',body:JSON.stringify(d)}),
+  balance:   (id,amount,reason)=>apiRequest('/admin/users/'+id+'/balance',{method:'PUT',body:JSON.stringify({amount,reason})}),
+  changeRole:(id,role,rank)=>apiRequest('/admin/users/'+id+'/role',{method:'PUT',body:JSON.stringify({role,adminRank:rank})}),
+  delUser:   (id)=> apiRequest('/admin/users/'+id,{method:'DELETE'}),
+  transfer:  (id)=> apiRequest('/admin/transfer-principal',{method:'PUT',body:JSON.stringify({userId:id})}),
+  encounters:()  => apiRequest('/admin/encounters'),
+  createEnc: (d) => apiRequest('/admin/encounters',{method:'POST',body:JSON.stringify(d)}),
+  encStatus: (id,s)=>apiRequest('/admin/encounters/'+id+'/status',{method:'PUT',body:JSON.stringify({status:s})}),
+  delEnc:    (id)=> apiRequest('/admin/encounters/'+id,{method:'DELETE'}),
+};
+
+// Announcements - loaded from backend
+let announcements = [];
+
+let me=null, students=[], admins=[], charts={}, selUserId=null;
+
+// ── Theme ──────────────────────────────────────────────────
+const ADMIN_THEME_KEY = 'dunab_admin_theme';
+function initAdminTheme(){
+  const t = localStorage.getItem(ADMIN_THEME_KEY)||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('theme-icon').innerHTML = t==='dark'?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';
+}
+function toggleAdminTheme(){
+  const cur = document.documentElement.getAttribute('data-theme')||'dark';
+  const next = cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem(ADMIN_THEME_KEY,next);
+  document.getElementById('theme-icon').innerHTML = next==='dark'?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';
+  // Rebuild charts with new colors
+  setTimeout(()=>loadStats(),100);
+}
+initAdminTheme();
+
+// ── Init ───────────────────────────────────────────────────
+async function init(){
+  const u = requireAdmin(); if(!u) return;
+  const pr = await UserAPI.getProfile();
+  if(!pr?.data||pr.data.role!=='ADMIN'){ window.location.href='/admin-login.html'; return; }
+  me = pr.data; Auth.setUser(me);
+  document.getElementById('sb-name').textContent = me.fullName.split(' ')[0];
+  const rankMap2 = {PRINCIPAL:'<i class="fa-solid fa-crown" style="color:#E8A020"></i> Admin Principal',REGULAR:'<i class="fa-solid fa-users-gear"></i> Admin Regular',SUPPORT:'<i class="fa-solid fa-headset"></i> Admin Soporte'};
+  document.getElementById('sb-rank').innerHTML = rankMap2[me.adminRank] || rankMap2['REGULAR'];
+  
+  document.getElementById('sb-avatar').src = me.profilePhotoUrl||`https://ui-avatars.com/api/?name=${encodeURIComponent(me.fullName)}&background=8B1A4A&color=fff`;
+  // Show principal-only features after me is set
+  if(me.adminRank==='PRINCIPAL' || me.isPrincipal===true ||
+     (me.adminRank && (typeof me.adminRank==='object'?me.adminRank.name:me.adminRank)==='PRINCIPAL')){
+    document.getElementById('principal-section').style.display='block';
+    document.getElementById('transfer-btn').style.display='flex';
+  }
+  refreshAll();
+}
+function refreshAll(){ loadStats(); loadStudents(); loadAdmins(); loadEncounters(); loadAnnouncements(); loadChatConversations(); }
+
+// ── Pages ──────────────────────────────────────────────────
+const pageTitles={
+  stats:['Estadísticas del Sistema','Visión general — actualiza cada 60s'],
+  students:['Gestión de Estudiantes','Todos los estudiantes registrados'],
+  admins:['Equipo Administrativo','Administradores del sistema DUNAB'],
+  encounters:['Encuentros Universitarios','Actividades y recompensas DUNAB'],
+  announcements:['Anuncios para Estudiantes','Comunicados visibles en el portal'],
+  'dunab-masivo':['Operaciones DUNAB Masivas','Dar o quitar DUNAB a múltiples estudiantes'],
+  transfer:['Transferir Cargo Principal','Delegar el rol de Admin Principal'],
+  'my-profile':['Mi Perfil','Tu Información y configuracion de administrador'],
+  'chat':['Soporte Chat','Mensajes de estudiantes'],
+};
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  const t=pageTitles[id]||['Panel',''];
+  document.getElementById('page-title').textContent=t[0];
+  document.getElementById('page-sub').textContent=t[1];
+  if(id==='transfer') populateTransfer();
+  if(id==='announcements') loadAnnouncements();
+  if(id==='chat'){loadChatConversations();}
+  if(id==='my-profile') loadMyProfile();
+  if(id==='dunab-masivo') populateSingleSelect();
+}
+
+// ── Stats & Charts ─────────────────────────────────────────
+async function loadStats(){
+  const res=await A.stats(); if(!res?.data) return;
+  const d=res.data;
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  const textColor = isDark?'#a07080':'#666';
+  const gridColor = isDark?'rgba(139,26,74,0.12)':'rgba(139,26,74,0.08)';
+
+  document.getElementById('stats-cards').innerHTML=`
+    <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-user-graduate"></i></div><div class="stat-num">${d.totalStudents}</div><div class="stat-lbl">Estudiantes</div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-coins"></i></div><div class="stat-num">${UI.formatDunab(d.totalDunabInSystem)}</div><div class="stat-lbl">DUNAB en circulación</div><div class="stat-sub">Prom: ${UI.formatDunab(d.avgDunabBalance)}</div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-clipboard-list"></i></div><div class="stat-num">${d.totalTransactions}</div><div class="stat-lbl">Transacciones</div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-trophy"></i></div><div class="stat-num">${d.totalEncounters}</div><div class="stat-lbl">Encuentros</div><div class="stat-sub">${d.totalRegistrations} inscripciones</div></div>`;
+
+  const bal=d.balanceDistribution||[];
+  mkChart('ch-balance','bar',{
+    labels:bal.map(b=>b.range+' D'),
+    datasets:[{label:'Estudiantes',data:bal.map(b=>b.count),backgroundColor:['rgba(139,26,74,0.7)','rgba(232,160,32,0.7)','rgba(76,175,80,0.7)','rgba(33,150,243,0.7)'],borderRadius:8}]
+  },{scales:{x:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10}}}},plugins:{legend:{display:false}}});
+
+  const enc=d.encountersByType||{};
+  mkChart('ch-enc','doughnut',{
+    labels:Object.keys(enc),
+    datasets:[{data:Object.values(enc),backgroundColor:['rgba(139,26,74,0.8)','rgba(232,160,32,0.8)','rgba(76,175,80,0.8)','rgba(33,150,243,0.8)','rgba(156,39,176,0.8)'],borderWidth:0}]
+  },{plugins:{legend:{position:'right',labels:{color:textColor,font:{size:10},boxWidth:12}}}});
+
+  const car=d.byCareer||{};
+  const carLabels=Object.keys(car).map(k=>k.length>16?k.substring(0,14)+'...':k);
+  mkChart('ch-career','bar',{
+    labels:carLabels,
+    datasets:[{label:'Estudiantes',data:Object.values(car),backgroundColor:'rgba(139,26,74,0.6)',borderRadius:6}]
+  },{indexAxis:'y',scales:{x:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:10}}}},plugins:{legend:{display:false}}});
+
+  const top=d.top5Students||[];
+  document.getElementById('top5').innerHTML=top.length===0?'<div class="empty">Sin datos</div>':
+    top.map((u,i)=>`<div class="top-item"><div class="top-pos">${['<i class="fa-solid fa-medal" style="color:#FFD700"></i>','<i class="fa-solid fa-medal" style="color:#C0C0C0"></i>','<i class="fa-solid fa-medal" style="color:#CD7F32"></i>','4°','5°'][i]}</div><div class="top-name"><div>${u.name}</div><div style="font-size:0.7rem;color:var(--sub)">${u.code}</div></div><div class="top-bal">${UI.formatDunab(u.balance)}</div></div>`).join('');
+}
+function mkChart(id,type,data,opts){
+  if(charts[id]) charts[id].destroy();
+  const ctx=document.getElementById(id)?.getContext('2d'); if(!ctx) return;
+  charts[id]=new Chart(ctx,{type,data,options:{responsive:true,maintainAspectRatio:false,...opts}});
+}
+
+// ── Students ───────────────────────────────────────────────
+async function loadStudents(){
+  const res=await A.users(null,'STUDENT');
+  students=res?.data||[];
+  document.getElementById('total-students-count').textContent=students.length+' estudiantes';
+  renderStudents(students);
+}
+function renderStudents(list){
+  document.getElementById('students-count').textContent=list.length+' estudiantes';
+  const tb=document.getElementById('t-students');
+  if(!list.length){tb.innerHTML='<tr><td colspan="6" class="empty">Sin resultados</td></tr>';return;}
+  tb.innerHTML=list.map(u=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:10px">
+      <img class="av-sm" src="${u.profilePhotoUrl||'https://ui-avatars.com/api/?name='+encodeURIComponent(u.fullName)+'&background=8B1A4A&color=fff'}" onerror="this.src='https://ui-avatars.com/api/?name=U&background=8B1A4A&color=fff'">
+      <div><div style="font-weight:600">${u.fullName}</div><div style="font-size:0.7rem;color:var(--sub)">${u.email}</div></div>
+    </div></td>
+    <td style="color:var(--sub)">${u.studentCode}</td>
+    <td style="font-size:0.78rem;color:var(--sub)">${u.career||'-'} ${u.semester?'· Sem.'+u.semester:''}</td>
+    <td style="font-weight:700;color:#E8A020">${UI.formatDunab(u.dunabBalance)}</td>
+    <td style="font-size:0.75rem;color:var(--sub)">${u.lastLogin?UI.formatDate(u.lastLogin):'Nunca'}</td>
+    <td><div class="action-btns">
+      <button class="btn-sm btn-view" onclick="viewUser(${u.id})"><i class="fa-solid fa-eye"></i> Ver</button>
+      <button class="btn-sm btn-edit" onclick="openBalModal(${u.id},'${u.fullName}')"><i class="fa-solid fa-coins"></i></button>
+      ${me?.adminRank==='PRINCIPAL'?`<button class="btn-sm btn-del" onclick="delUser(${u.id},'${u.fullName}')"><i class="fa-solid fa-trash"></i></button>`:''}
+    </div></td>
+  </tr>`).join('');
+}
+let sqt;
+function filterStudents(){
+  clearTimeout(sqt);
+  sqt=setTimeout(()=>{
+    const q=document.getElementById('q-students').value.toLowerCase();
+    renderStudents(q?students.filter(u=>u.fullName.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)||u.studentCode.toLowerCase().includes(q)):students);
+  },300);
+}
+
+// ── Admins ─────────────────────────────────────────────────
+async function loadAdmins(){
+  const res=await A.users(null,'ADMIN');
+  admins=res?.data||[];
+  const tb=document.getElementById('t-admins');
+  if(!admins.length){tb.innerHTML='<tr><td colspan="6" class="empty">Sin administradores registrados</td></tr>';return;}
+  const amPrincipal = isPrincipalAdmin();
+  tb.innerHTML=admins.map(u=>{
+    const isMe = u.id === me?.id;
+    const uIsPrincipal = u.adminRank==='PRINCIPAL' || u.isPrincipal;
+    let actions = '';
+    if (isMe) {
+      actions = '<span style="font-size:0.75rem;color:#E8A020;font-weight:600">← Tú</span>';
+    } else if (amPrincipal) {
+      if (uIsPrincipal) {
+        // Principal CAN edit other principals
+        actions = `
+          <button class="btn-sm btn-edit" onclick="editAdminRank(${u.id},'${u.fullName.replace(/'/g,"\'")}','PRINCIPAL')"><i class="fa-solid fa-pen"></i> Rango</button>
+          <button class="btn-sm btn-del" onclick="delUser(${u.id},'${u.fullName.replace(/'/g,"\'")}')"><i class="fa-solid fa-trash"></i></button>`;
+      } else {
+        actions = `
+          <button class="btn-sm btn-edit" onclick="editAdminRank(${u.id},'${u.fullName.replace(/'/g,"\'")}','${u.adminRank||'REGULAR'}')"><i class="fa-solid fa-pen"></i> Rango</button>
+          <button class="btn-sm btn-view" onclick="changeToStudent(${u.id},'${u.fullName.replace(/'/g,"\'")}')"><i class="fa-solid fa-user-minus"></i> Quitar</button>
+          <button class="btn-sm btn-del" onclick="delUser(${u.id},'${u.fullName.replace(/'/g,"\'")}')"><i class="fa-solid fa-trash"></i> Eliminar</button>`;
+      }
+    }
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:10px">
+        <img class="av-sm" src="${u.profilePhotoUrl||'https://ui-avatars.com/api/?name='+encodeURIComponent(u.fullName)+'&background=8B1A4A&color=fff'}" onerror="this.src='https://ui-avatars.com/api/?name=A&background=8B1A4A&color=fff'">
+        <div><div style="font-weight:600">${u.fullName} ${uIsPrincipal?'<i class="fa-solid fa-crown" style="color:#E8A020"></i>':''}</div></div>
+      </div></td>
+      <td style="color:var(--sub);font-size:0.8rem">${u.email}</td>
+      <td style="color:var(--sub)">${u.studentCode}</td>
+      <td><span class="badge badge-${uIsPrincipal?'PRINCIPAL':'REGULAR'}">${uIsPrincipal?'Principal':u.adminRank==='SUPPORT'?'Soporte':'Regular'}</span></td>
+      <td style="font-size:0.75rem;color:var(--sub)">${u.lastLogin?UI.formatDate(u.lastLogin):'Nunca'}</td>
+      <td><div class="action-btns">${actions}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function isPrincipalAdmin(){
+  if(!me) return false;
+  if(me.isPrincipal === true) return true;
+  const rank = me.adminRank;
+  if(!rank) return false;
+  const rankStr = typeof rank === 'object' ? (rank.name||'') : String(rank);
+  return rankStr.toUpperCase() === 'PRINCIPAL';
+}
+function checkAndOpenAdminModal(){
+  if(!isPrincipalAdmin()){
+    UI.toast('Solo el Admin Principal puede crear nuevos administradores','error');
+    return;
+  }
+  ['adm-name','adm-email','adm-code','adm-pass'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('adm-rank').value='REGULAR';
+  openModal('modal-admin');
+}
+
+// ── User actions ───────────────────────────────────────────
+// ── User actions ───────────────────────────────────────────
+async function viewUser(id){
+  const res=await A.userDetail(id); if(!res?.data) return;
+  const u=res.data;
+  document.getElementById('modal-user-title').textContent=u.fullName;
+  document.getElementById('modal-user-body').innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <img src="${u.profilePhotoUrl||'https://ui-avatars.com/api/?name='+encodeURIComponent(u.fullName)+'&background=8B1A4A&color=fff&size=200'}" style="width:60px;height:60px;border-radius:50%;border:2px solid #8B1A4A;object-fit:cover">
+      <div><div style="font-weight:700">${u.fullName}</div><div style="color:var(--sub);font-size:0.8rem">${u.email}</div><span class="badge badge-student">STUDENT</span></div>
+    </div>
+    <div class="detail-grid">
+      <div><div class="d-lbl">Código</div><div class="d-val">${u.studentCode}</div></div>
+      <div><div class="d-lbl">Saldo DUNAB</div><div class="d-val" style="color:#E8A020;font-size:1.1rem">${UI.formatDunab(u.dunabBalance)}</div></div>
+      <div><div class="d-lbl">Carrera</div><div class="d-val">${u.career||'-'}</div></div>
+      <div><div class="d-lbl">Semestre</div><div class="d-val">${u.semester?u.semester+'°':'-'}</div></div>
+      <div><div class="d-lbl">Transacciones</div><div class="d-val">${u.totalTransactions}</div></div>
+      <div><div class="d-lbl">Encuentros</div><div class="d-val">${u.encountersCount}</div></div>
+      <div><div class="d-lbl">Registro</div><div class="d-val">${UI.formatDate(u.createdAt)}</div></div>
+      <div><div class="d-lbl">Último acceso</div><div class="d-val">${u.lastLogin?UI.formatDate(u.lastLogin):'Nunca'}</div></div>
+    </div>
+    ${u.achievements?.length?`<div class="section-sub"><i class="fa-solid fa-medal"></i> Logros (${u.achievements.length})</div><div>${u.achievements.map(a=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(139,26,74,0.1);color:#8B1A4A;border-radius:6px;font-size:0.72rem;margin:2px"><i class="fa-solid fa-medal"></i>${a.displayName}</span>`).join('')}</div>`:''}
+    <div class="section-sub"><i class="fa-solid fa-clock-rotate-left"></i> Ultimas transacciones</div>
+    ${u.recentTransactions?.length?u.recentTransactions.map(t=>`<div class="tx-mini"><span>${t.description}</span><span style="font-weight:600;color:${t.type==='INGRESO'?'#4CAF50':'#dc3545'}">${t.type==='INGRESO'?'+':''}${t.amount} D</span></div>`).join(''):'<div style="color:var(--sub);font-size:0.8rem">Sin transacciones</div>'}
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-sm btn-edit" style="padding:7px 14px" onclick="closeModal('modal-user');openBalModal(${u.id},'${u.fullName}')"><i class="fa-solid fa-coins"></i> Ajustar saldo</button>
+      <button class="btn-sm btn-view" style="padding:7px 14px" onclick="closeModal('modal-user');openResetPassModal(${u.id},'${u.fullName}')"><i class="fa-solid fa-key"></i> Restablecer contraseña</button>
+    </div>`;
+  openModal('modal-user');
+}
+function openBalModal(id,name){ selUserId=id; document.getElementById('modal-balance-name').textContent=''+name; document.getElementById('bal-amount').value=''; document.getElementById('bal-reason').value=''; openModal('modal-balance'); }
+async function applyBalance(){
+  const amount=parseFloat(document.getElementById('bal-amount').value);
+  const reason=document.getElementById('bal-reason').value.trim()||'Ajuste manual';
+  if(isNaN(amount)||amount===0){UI.toast('Ingresa un monto válido','error');return;}
+  const res=await A.balance(selUserId,amount,reason);
+  if(res?.success){UI.toast('Saldo ajustado <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success');closeModal('modal-balance');loadStudents();loadStats();}
+  else UI.toast(res?.message||'Error','error');
+}
+async function changeToStudent(id,name){
+  if(!confirm(`¿Quitar el rol de admin a "${name}"?`))return;
+  const res=await A.changeRole(id,'STUDENT',null);
+  if(res?.success){UI.toast('Rol actualizado','success');loadAdmins();loadStudents();}
+  else UI.toast(res?.message||'Error','error');
+}
+async function delUser(id,name){
+  if(!confirm(`¿Eliminar al usuario "${name}"? Esta acción no se puede deshacer.`))return;
+  const res=await A.delUser(id);
+  if(res?.success){UI.toast('Usuario eliminado','success');loadStudents();loadAdmins();loadStats();}
+  else UI.toast(res?.message||'Error','error');
+}
+
+// ── Create admin ───────────────────────────────────────────
+async function createAdmin(){
+  const name=document.getElementById('adm-name').value.trim();
+  const email=document.getElementById('adm-email').value.trim();
+  const code=document.getElementById('adm-code').value.trim();
+  const pass=document.getElementById('adm-pass').value;
+  const rank=document.getElementById('adm-rank').value;
+  if(!name||!email||!code||!pass){UI.toast('Completa todos los campos','error');return;}
+  if(pass.length<6){UI.toast('La contraseña debe tener al menos 6 caracteres','error');return;}
+  const res=await A.createAdmin({fullName:name,email,studentCode:code,password:pass,adminRank:rank});
+  if(res?.success){UI.toast('Administrador creado <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success');closeModal('modal-admin');['adm-name','adm-email','adm-code','adm-pass'].forEach(id=>document.getElementById(id).value='');loadAdmins();}
+  else UI.toast(res?.message||'Error','error');
+}
+
+// ── Encounters ─────────────────────────────────────────────
+async function loadEncounters(){
+  const res=await A.encounters(); if(!res?.data) return;
+  const icons={DEPORTIVO:'<i class="fa-solid fa-futbol"></i>',ACADEMICO:'<i class="fa-solid fa-book"></i>',CULTURAL:'<i class="fa-solid fa-masks-theater"></i>',TECNOLOGICO:'<i class="fa-solid fa-laptop-code"></i>',SOCIAL:'<i class="fa-solid fa-handshake"></i>'};
+  const tb=document.getElementById('t-enc');
+  if(!res.data.length){tb.innerHTML='<tr><td colspan="7" class="empty">Sin encuentros</td></tr>';return;}
+  tb.innerHTML=res.data.map(e=>{
+    const date=new Date(e.encounterDate).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    return `<tr>
+      <td style="font-weight:600">${e.title}</td>
+      <td style="font-size:0.8rem;color:var(--sub)">${icons[e.type]||''} ${e.type}</td>
+      <td style="font-size:0.75rem;color:var(--sub)">${date}</td>
+      <td style="color:#E8A020;font-weight:700">+${e.dunabReward} D</td>
+      <td style="color:var(--sub)">${e.registrationCount}${e.maxParticipants?' / '+e.maxParticipants:''}</td>
+      <td><span class="badge badge-${e.status}">${e.status}</span></td>
+      <td><div class="action-btns">
+        ${e.status==='ACTIVO'?`<button class="btn-sm btn-edit" onclick="encStatus(${e.id},'CERRADO')">Cerrar</button>`:''}
+        ${e.status==='CERRADO'?`<button class="btn-sm btn-view" onclick="encStatus(${e.id},'FINALIZADO')">Finalizar</button>`:''}
+        <button class="btn-sm btn-del" onclick="delEnc(${e.id})"><i class="fa-solid fa-trash"></i></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+async function createEncounter(){
+  const title=document.getElementById('enc-title').value.trim();
+  const desc=document.getElementById('enc-desc').value.trim();
+  const type=document.getElementById('enc-type').value;
+  const loc=document.getElementById('enc-loc').value.trim();
+  const dateVal=document.getElementById('enc-date').value;
+  const reward=parseFloat(document.getElementById('enc-reward').value);
+  const max=parseInt(document.getElementById('enc-max').value)||null;
+  if(!title){UI.toast('Ingresa el título','error');return;}
+  if(!dateVal){UI.toast('Selecciona la fecha','error');return;}
+  if(!reward||reward<=0){UI.toast('Ingresa la recompensa','error');return;}
+  const res=await A.createEnc({title,description:desc,type,location:loc,encounterDate:dateVal+':00',dunabReward:reward,maxParticipants:max});
+  if(res?.success){UI.toast('Encuentro creado <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success');closeModal('modal-enc');loadEncounters();}
+  else UI.toast(res?.message||'Error','error');
+}
+async function encStatus(id,s){const res=await A.encStatus(id,s);if(res?.success){UI.toast('Estado actualizado','success');loadEncounters();}}
+async function delEnc(id){if(!confirm('¿Eliminar este encuentro?'))return;const res=await A.delEnc(id);if(res?.success){UI.toast('Eliminado','success');loadEncounters();loadStats();}}
+
+// ── Announcements ────────────────────────────────────────
+function canEditAnn(a){
+  if(!me) return false;
+  if(isPrincipalAdmin()) return true;
+  return a.createdById && a.createdById === me.id;
+}
+function renderAnnouncements(){
+  const el=document.getElementById('ann-list');
+  if(!announcements.length){el.innerHTML='<div class="empty">No hay anuncios publicados. Crea el primero con el botón + Nuevo Anuncio.</div>';return;}
+  const icons={INFO:'<i class="fa-solid fa-circle-info"></i>',WARNING:'<i class="fa-solid fa-triangle-exclamation"></i>',SUCCESS:'<i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>',URGENT:'<i class="fa-solid fa-circle-exclamation" style="color:#dc3545"></i>'};
+  el.innerHTML=announcements.map(a=>`
+    <div class="ann-item ann-type-${a.type}" style="opacity:${a.active?1:0.5}">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        ${a.imageUrl?`<img src="${a.imageUrl}" style="width:72px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border)" onerror="this.style.display='none'">`:''}
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+            <div style="font-weight:700;font-size:0.88rem">${icons[a.type]||''} ${a.title}
+              ${!a.active?'<span style="font-size:0.7rem;color:var(--sub);font-weight:400"> (inactivo)</span>':''}
+            </div>
+            <div style="display:flex;gap:5px;align-items:center;flex-shrink:0;margin-left:8px">
+              <span style="font-size:0.7rem;color:var(--sub)">${UI.formatDate(a.createdAt)}</span>
+              ${canEditAnn(a)?`
+              <button class="btn-sm btn-edit" onclick="toggleAnn(${a.id})">${a.active?'Pausar':'Activar'}</button>
+              <button class="btn-sm btn-del" onclick="delAnn(${a.id})"><i class="fa-solid fa-trash"></i></button>
+              `:'<span style="font-size:0.7rem;color:var(--sub);font-style:italic">Solo lectura</span>'}
+            </div>
+          </div>
+          <div style="font-size:0.81rem;color:var(--sub);line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${a.content}</div>
+          ${a.createdByName?`<div style="font-size:0.7rem;color:var(--sub);margin-top:3px"><i class="fa-solid fa-user" style="font-size:0.65rem"></i> ${a.createdByName}</div>`:''}
+          ${a.expiresAt?`<div style="font-size:0.7rem;color:var(--sub);margin-top:4px"><i class="fa-solid fa-clock"></i> Expira: ${UI.formatDate(a.expiresAt)}</div>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+async function loadAnnouncements(){
+  const res = await apiRequest('/announcements/all');
+  announcements = res?.data || [];
+  renderAnnouncements();
+}
+async function createAnn(){
+  const title=document.getElementById('ann-title').value.trim();
+  const annContent=document.getElementById('ann-content').value.trim();
+  const type=document.getElementById('ann-type').value;
+  const expires=document.getElementById('ann-expires').value||null;
+  const imageFile=document.getElementById('ann-image').files[0];
+  if(!title||!annContent){UI.toast('Completa titulo y contenido','error');return;}
+  const token=Auth.getToken();
+  const fd=new FormData();
+  fd.append('title',title);
+  fd.append('content',annContent);
+  fd.append('type',type);
+  if(expires) fd.append('expiresAt',expires);
+  if(imageFile) fd.append('image',imageFile);
+  try {
+    const r=await fetch('/api/announcements',{method:'POST',headers:{'Authorization':'Bearer '+token},body:fd});
+    const data=await r.json();
+    if(data?.success){
+      UI.toast('Anuncio publicado — los estudiantes ya pueden verlo','success');
+      closeModal('modal-ann');
+      ['ann-title','ann-content','ann-expires'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('ann-image').value='';
+      document.getElementById('ann-image-preview').style.display='none';
+      await loadAnnouncements();
+    } else UI.toast(data?.message||'Error','error');
+  } catch(e){ UI.toast('Error al publicar: '+e.message,'error'); }
+}
+async function toggleAnn(id){
+  const res=await apiRequest('/announcements/'+id+'/toggle',{method:'PUT'});
+  if(res?.success){await loadAnnouncements();}
+}
+async function delAnn(id){
+  if(!confirm('¿Eliminar este anuncio? Los estudiantes ya no podrán verlo.'))return;
+  const res=await apiRequest('/announcements/'+id,{method:'DELETE'});
+  if(res?.success){UI.toast('Anuncio eliminado','success');await loadAnnouncements();}
+}
+
+// ── DUNAB Masivo ───────────────────────────────────────────
+function populateSingleSelect(){
+  const sel=document.getElementById('single-student');
+  sel.innerHTML='<option value="">Seleccionar...</option>'+
+    students.map(u=>`<option value="${u.id}">${u.fullName} (${u.studentCode})</option>`).join('');
+}
+async function applyMassDunab(){
+  const amount=parseFloat(document.getElementById('mass-amount').value);
+  const reason=document.getElementById('mass-reason').value.trim()||'Ajuste masivo';
+  if(isNaN(amount)||amount===0){UI.toast('Ingresa un monto válido','error');return;}
+  if(!confirm(`¿Dar ${amount} D a los ${students.length} estudiantes? Motivo: ${reason}`))return;
+  let ok=0,fail=0;
+  UI.toast('Aplicando a todos los estudiantes...','info');
+  for(const s of students){
+    const res=await A.balance(s.id,amount,reason);
+    if(res?.success) ok++; else fail++;
+  }
+  UI.toast(`<i class="fa-solid fa-circle-check" style="color:#4CAF50"></i> Aplicado a ${ok} estudiantes${fail>0?' · <i class="fa-solid fa-triangle-exclamation"></i> '+fail+' errores':''}`,fail>0?'warning':'success');
+  document.getElementById('mass-amount').value='';
+  document.getElementById('mass-reason').value='';
+  loadStudents(); loadStats();
+}
+async function applySingleDunab(){
+  const userId=parseInt(document.getElementById('single-student').value);
+  const amount=parseFloat(document.getElementById('single-amount').value);
+  const reason=document.getElementById('single-reason').value.trim()||'Ajuste individual';
+  if(!userId){UI.toast('Selecciona un estudiante','error');return;}
+  if(isNaN(amount)||amount===0){UI.toast('Ingresa un monto válido','error');return;}
+  const res=await A.balance(userId,amount,reason);
+  if(res?.success){UI.toast('Saldo ajustado <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success');document.getElementById('single-amount').value='';document.getElementById('single-reason').value='';loadStudents();loadStats();}
+  else UI.toast(res?.message||'Error','error');
+}
+
+// ── Edit admin rank ────────────────────────────────────────
+let editRankUserId = null;
+function editAdminRank(id, name, currentRank) {
+  editRankUserId = id;
+  document.getElementById('edit-rank-name').textContent = name;
+  document.getElementById('edit-rank-select').value = currentRank;
+  openModal('modal-edit-rank');
+}
+async function applyEditRank() {
+  const rank = document.getElementById('edit-rank-select').value;
+  const res = await A.changeRole(editRankUserId, 'ADMIN', rank);
+  if (res?.success) {
+    UI.toast('Rango actualizado <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>', 'success');
+    closeModal('modal-edit-rank');
+    loadAdmins();
+  } else UI.toast(res?.message || 'Error', 'error');
+}
+
+// ── Transfer ───────────────────────────────────────────────
+async function populateTransfer(){
+  // Reload fresh admin list
+  const res = await A.users(null,'ADMIN');
+  admins = res?.data || [];
+  const others = admins.filter(a => a.id !== me.id && !a.isPrincipal && !(a.adminRank==='PRINCIPAL'||a.adminRank?.name==='PRINCIPAL'));
+  const sel = document.getElementById('transfer-target');
+  if(others.length === 0){
+    sel.innerHTML = '<option value="">No hay otros administradores disponibles</option>';
+  } else {
+    sel.innerHTML = '<option value="">Seleccionar administrador...</option>' +
+      others.map(a=>`<option value="${a.id}">${a.fullName} (${a.adminRank||'REGULAR'})</option>`).join('');
+  }
+}
+async function doTransfer(){
+  const userId=parseInt(document.getElementById('transfer-target').value);
+  if(!userId){UI.toast('Selecciona un administrador','error');return;}
+  const t=admins.find(a=>a.id===userId);
+  if(!confirm(`¿Transferir el cargo de Admin Principal a "${t?.fullName}"? Perderás tus privilegios.`))return;
+  const res=await A.transfer(userId);
+  if(res?.success){UI.toast('Cargo transferido. Recargando...','success');setTimeout(()=>window.location.reload(),1500);}
+  else UI.toast(res?.message||'Error','error');
+}
+
+// ── Announcement image preview ─────────────────────────────
+function previewAnnImage(input){
+  const preview=document.getElementById('ann-image-preview');
+  if(input.files&&input.files[0]){
+    const reader=new FileReader();
+    reader.onload=e=>{preview.src=e.target.result;preview.style.display='block';};
+    reader.readAsDataURL(input.files[0]);
+  } else {preview.style.display='none';}
+}
+
+// ── Reset password ─────────────────────────────────────────
+let resetPassUserId = null;
+function openResetPassModal(id, name){
+  resetPassUserId = id;
+  document.getElementById('reset-pass-name').textContent = name;
+  document.getElementById('new-pass').value = '';
+  openModal('modal-reset-pass');
+}
+async function applyResetPass(){
+  const newPass = document.getElementById('new-pass').value.trim();
+  if(!newPass || newPass.length < 6){ UI.toast('La contraseña debe tener al menos 6 caracteres','error'); return; }
+  const res = await apiRequest('/admin/users/'+resetPassUserId+'/reset-password', {
+    method:'PUT', body: JSON.stringify({newPassword: newPass})
+  });
+  if(res?.success){ UI.toast('Contraseña restablecida <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success'); closeModal('modal-reset-pass'); }
+  else UI.toast(res?.message||'Error','error');
+}
+
+// ── PDF exports ────────────────────────────────────────────
+function exportPDF(type){
+  if(type==='students'){
+    if(!students.length){UI.toast('Sin estudiantes','error');return;}
+    const rows=students.map(u=>`<tr><td>${u.fullName}</td><td>${u.studentCode}</td><td>${u.email}</td><td>${u.career||'-'}</td><td>${u.semester?u.semester+'°':'-'}</td><td>${UI.formatDunab(u.dunabBalance)}</td></tr>`).join('');
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial;padding:30px}h1{color:#8B1A4A}table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px}th{background:#8B1A4A;color:#fff;padding:8px;text-align:left}td{padding:7px;border-bottom:1px solid #eee}</style></head><body><h1><i class="fa-solid fa-users"></i> Estudiantes DUNAB — UNAB</h1><p>Fecha: ${new Date().toLocaleDateString('es-CO')} | Total: ${students.length}</p><table><thead><tr><th>Nombre</th><th>Código</th><th>Email</th><th>Carrera</th><th>Semestre</th><th>Saldo DUNAB</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+    const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),500);
+  }
+}
+
+// ── Modal helpers ──────────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+// ── Mi Perfil ─────────────────────────────────────────────
+function loadMyProfile(){
+  if(!me) return;
+  document.getElementById('mp-avatar').src = me.profilePhotoUrl ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(me.fullName)}&background=8B1A4A&color=fff&size=200`;
+  document.getElementById('mp-name').textContent = me.fullName;
+  document.getElementById('mp-email').textContent = me.email;
+  document.getElementById('mp-code').textContent = me.studentCode;
+  const rankMapProfile = {PRINCIPAL:'<i class="fa-solid fa-crown" style="color:#E8A020"></i> Admin Principal',REGULAR:'<i class="fa-solid fa-users-gear"></i> Admin Regular',SUPPORT:'<i class="fa-solid fa-headset"></i> Admin Soporte'};
+  const rank = rankMapProfile[me.adminRank] || (me.isPrincipal ? rankMapProfile['PRINCIPAL'] : rankMapProfile['REGULAR']);
+  document.getElementById('mp-rank').innerHTML = rank;
+  document.getElementById('mp-rank-badge').innerHTML = rank;
+  const rankClass = me.adminRank||'REGULAR';
+  document.getElementById('mp-rank-badge').className = `badge badge-${rankClass}`;
+  document.getElementById('mp-since').textContent = UI.formatDate(me.createdAt);
+  document.getElementById('mp-last').textContent = me.lastLogin ? UI.formatDate(me.lastLogin) : 'Ahora';
+  document.getElementById('mp-edit-name').value = me.fullName;
+  document.getElementById('mp-edit-career').value = me.career || '';
+}
+async function uploadAdminPhoto(input){
+  if(!input.files[0]) return;
+  try {
+    const res = await UserAPI.uploadPhoto(input.files[0]);
+    if(res?.success){
+      UI.toast('Foto actualizada', 'success');
+      document.getElementById('mp-avatar').src = res.data + '?t=' + Date.now();
+      document.getElementById('sb-avatar').src = res.data + '?t=' + Date.now();
+      me.profilePhotoUrl = res.data;
+      Auth.setUser(me);
+    } else UI.toast(res?.message||'Error al subir foto','error');
+  } catch(e){ UI.toast('Error al subir foto','error'); }
+}
+
+async function saveMyProfile(){
+  const name = document.getElementById('mp-edit-name').value.trim();
+  const career = document.getElementById('mp-edit-career').value.trim();
+  if(!name){ UI.toast('Ingresa tu nombre','error'); return; }
+  const res = await apiRequest('/users/me', {
+    method:'PUT',
+    body: new URLSearchParams({fullName:name, career}).toString(),
+    headers: {'Content-Type':'application/x-www-form-urlencoded', 'Authorization':'Bearer '+Auth.getToken()}
+  });
+  // Refresh profile
+  const pr = await UserAPI.getProfile();
+  if(pr?.data){ me=pr.data; Auth.setUser(me); loadMyProfile(); UI.toast('Perfil actualizado <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success'); }
+}
+async function changeMyPass(){
+  const pass = document.getElementById('mp-pass').value;
+  const pass2 = document.getElementById('mp-pass2').value;
+  if(!pass || pass.length < 6){ UI.toast('La contraseña debe tener al menos 6 caracteres','error'); return; }
+  if(pass !== pass2){ UI.toast('Las contraseñas no coinciden','error'); return; }
+  const res = await apiRequest('/admin/users/'+me.id+'/reset-password',{
+    method:'PUT', body:JSON.stringify({newPassword:pass})
+  });
+  if(res?.success){ UI.toast('Contraseña cambiada <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success'); document.getElementById('mp-pass').value=''; document.getElementById('mp-pass2').value=''; }
+  else UI.toast(res?.message||'Error','error');
+}
+
+// ── Chat ──────────────────────────────────────────────────
+let activeChatConvId = null;
+let chatPollInterval = null;
+
+function switchChatTab(showAll) {
+  const btnMy = document.getElementById('tab-my-chats');
+  const btnAll = document.getElementById('tab-all-chats');
+  if (btnMy && btnAll) {
+    btnMy.style.background = showAll ? 'transparent' : '#8B1A4A';
+    btnMy.style.color = showAll ? 'var(--sub)' : '#fff';
+    btnAll.style.background = showAll ? '#8B1A4A' : 'transparent';
+    btnAll.style.color = showAll ? '#fff' : 'var(--sub)';
+  }
+  loadChatConversations(showAll);
+}
+
+async function loadChatConversations(showAll) {
+  const endpoint = showAll ? '/chat/conversations/all' : '/chat/conversations';
+  const res = await apiRequest(endpoint);
+  const convs = res?.data || [];
+  const el = document.getElementById('conv-list');
+  if (!convs.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--sub);font-size:0.82rem">No hay conversaciones ' + (showAll?'':'activas para ti') + '</div>';
+    return;
+  }
+  el.innerHTML = convs.map(c => `
+    <div onclick="openConversation(${c.id},'${c.studentName.replace(/'/g,"\'")}','${c.studentCode}',${c.assignedAdminId||null},'${c.status}')"
+      style="padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:4px;border:1px solid ${c.id===activeChatConvId?'#8B1A4A':'transparent'};background:${c.id===activeChatConvId?'rgba(139,26,74,0.08)':'transparent'};transition:all 0.15s">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="display:flex;gap:8px;align-items:center;min-width:0">
+          <div style="position:relative;flex-shrink:0">
+            <img src="${c.studentPhoto||`https://ui-avatars.com/api/?name=${encodeURIComponent(c.studentName)}&background=8B1A4A&color=fff&size=60`}"
+              style="width:36px;height:36px;border-radius:50%;object-fit:cover">
+            <span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:${c.studentOnline?'#4CAF50':'#bbb'};border:2px solid var(--card-bg)"></span>
+          </div>
+          <div style="min-width:0">
+            <div style="font-weight:600;font-size:0.84rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.studentName}</div>
+            <div style="font-size:0.7rem;color:var(--sub)">${c.studentCode} · ${c.studentOnline?'En linea':'Desconectado'}</div>
+          </div>
+        </div>
+        ${c.unreadByAdmin>0?`<span style="background:#dc3545;color:#fff;border-radius:10px;padding:2px 7px;font-size:0.68rem;font-weight:700;flex-shrink:0;margin-left:4px">${c.unreadByAdmin}</span>`:''}
+      </div>
+      <div style="font-size:0.7rem;color:var(--sub);margin-top:5px;display:flex;justify-content:space-between;align-items:center">
+        <span>${c.assignedAdminName?`<i class="fa-solid fa-user-gear" style="font-size:0.6rem"></i> ${c.assignedAdminName}`:(c.status==='CLOSED'?'<i class="fa-solid fa-lock"></i> Cerrada':'Sin asignar')}</span>
+        <span>${UI.formatDate(c.lastMessageAt)}</span>
+      </div>
+    </div>`).join('');
+
+  // Update badge
+  const totalUnread = convs.reduce((s,c)=>s+c.unreadByAdmin,0);
+  const badge = document.getElementById('chat-badge');
+  if(totalUnread>0){badge.textContent=totalUnread;badge.style.display='inline';}
+  else{badge.style.display='none';}
+}
+
+async function openConversation(id, name, code, assignedAdminId, status) {
+  activeChatConvId = id;
+  if(chatPollInterval) clearInterval(chatPollInterval);
+  const isMine = !assignedAdminId || assignedAdminId === me?.id;
+  const isClosed = status === 'CLOSED';
+  await renderChatWindow(id, name, code, isMine && !isClosed);
+  if(isMine && !isClosed) {
+    chatPollInterval = setInterval(()=>refreshChatMessages(id), 3000);
+  } else {
+    // Still refresh but no input
+    await refreshChatMessages(id);
+  }
+  loadChatConversations();
+}
+
+async function renderChatWindow(id, name, code, canReply=true) {
+  const win = document.getElementById('chat-window');
+  const inputBar = canReply ? `
+    <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center">
+      <input type="text" id="admin-chat-input" placeholder="Escribe tu respuesta... (Enter para enviar)"
+        style="flex:1;padding:9px 14px;border:1px solid var(--border);border-radius:20px;background:var(--input-bg);color:var(--text);font-size:0.85rem;outline:none"
+        onkeydown="if(event.key==='Enter')adminSend(${id})">
+      <button onclick="adminSend(${id})" style="width:36px;height:36px;border-radius:50%;background:#8B1A4A;border:none;color:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.85rem">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>` : `
+    <div style="padding:12px;border-top:1px solid var(--border);text-align:center;font-size:0.78rem;color:var(--sub)">
+      <i class="fa-solid fa-eye" style="margin-right:4px"></i> Solo lectura — esta conversacion pertenece a otro administrador
+    </div>`;
+  const closeBtn = canReply ? `<button onclick="closeConversation(${id})" class="btn-sm btn-edit" style="margin-left:auto;padding:5px 12px"><i class="fa-solid fa-lock"></i> Cerrar</button>` : '';
+  win.innerHTML = `
+    <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+      <i class="fa-solid fa-user" style="color:#8B1A4A"></i>
+      <div><div style="font-weight:700;font-size:0.88rem;color:var(--text)">${name}</div><div style="font-size:0.72rem;color:var(--sub)">${code}</div></div>
+      ${closeBtn}
+    </div>
+    <div id="chat-msgs-${id}" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px"></div>
+    ${inputBar}`;
+  await refreshChatMessages(id);
+}
+
+async function refreshChatMessages(id) {
+  const res = await apiRequest('/chat/conversations/'+id+'/messages');
+  const msgs = res?.data || [];
+  const container = document.getElementById('chat-msgs-'+id);
+  if (!container) return;
+  const wasAtBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 60;
+  if (!msgs.length) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--sub);font-size:0.82rem">Sin mensajes aun</div>';
+    return;
+  }
+  container.innerHTML = msgs.map(m=>{
+    const isAdmin = m.senderRole==='ADMIN';
+    return `<div style="display:flex;gap:8px;align-items:flex-end;${isAdmin?'flex-direction:row-reverse':''}">
+      <div style="width:28px;height:28px;border-radius:50%;background:${isAdmin?'#8B1A4A':'#E8A020'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i class="fa-solid ${isAdmin?'fa-headset':'fa-user'}" style="color:#fff;font-size:0.65rem"></i>
+      </div>
+      <div style="max-width:70%">
+        <div style="font-size:0.7rem;color:var(--sub);margin-bottom:2px;${isAdmin?'text-align:right':''}">${m.senderName}</div>
+        <div style="padding:9px 13px;border-radius:${isAdmin?'14px 4px 14px 14px':'4px 14px 14px 14px'};background:${isAdmin?'#8B1A4A':'var(--hover,rgba(0,0,0,0.06))'};color:${isAdmin?'#fff':'var(--text)'};font-size:0.85rem;line-height:1.5">${m.content}</div>
+        <div style="font-size:0.68rem;color:var(--sub);margin-top:2px;${isAdmin?'text-align:right':''}">${UI.formatDate(m.sentAt)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  if(wasAtBottom || msgs.length<=2) container.scrollTop=container.scrollHeight;
+}
+
+async function adminSend(id) {
+  const input = document.getElementById('admin-chat-input');
+  const content = input.value.trim();
+  if (!content) return;
+  const res = await apiRequest('/chat/conversations/'+id+'/send',{method:'POST',body:JSON.stringify({content})});
+  if(res?.success){input.value='';await refreshChatMessages(id);loadChatConversations();}
+  else UI.toast(res?.message||'Error','error');
+}
+
+async function closeConversation(id) {
+  if(!confirm('¿Cerrar esta conversacion? El estudiante no podra seguir enviando mensajes.')) return;
+  const res = await apiRequest('/chat/conversations/'+id+'/close',{method:'PUT'});
+  if(res?.success){UI.toast('Conversacion cerrada','success');activeChatConvId=null;if(chatPollInterval)clearInterval(chatPollInterval);loadChatConversations();document.getElementById('chat-window').innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--sub)">Selecciona una conversacion</div>';}
+}
+
+// ── Auto refresh 60s ───────────────────────────────────────
+setInterval(()=>{loadStats();loadStudents();loadAdmins();loadEncounters();},60000);
+
+init();
+</script>
+</body>
+</html>

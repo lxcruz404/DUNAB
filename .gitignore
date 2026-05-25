@@ -1,0 +1,23 @@
+# Maven
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Uploads (images stored locally - use cloud storage in production)
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+uploads/*.gif
+uploads/*.webp
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db

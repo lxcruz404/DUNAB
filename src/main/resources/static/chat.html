@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<script>
+(function(){var t=localStorage.getItem('dunab_theme')||'light';document.documentElement.setAttribute('data-theme',t);var bg=t==='dark'?'#1a0a0f':'#8B1A4A';var card=t==='dark'?'#2d1520':'#fff';document.write('<style>html,body{background:'+bg+' !important}.chat-panel{background:'+card+' !important}</style>');})();
+</script>
+<link rel="stylesheet" href="/theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>DUNAB - Mensajes</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh}
+main{padding:20px 28px;max-width:1100px;margin:0 auto}
+.chat-layout{display:grid;grid-template-columns:300px 1fr;gap:16px;height:calc(100vh - 170px);min-height:500px}
+.chat-panel{background:#fff;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border-color,#e0e0e0)}
+.panel-header{padding:14px 16px;border-bottom:1px solid var(--border-color,#f0f0f0);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.panel-header-title{font-weight:700;font-size:0.88rem;color:var(--text-primary,#1a1a1a)}
+.tab-bar{display:flex;border-bottom:1px solid var(--border-color,#f0f0f0);flex-shrink:0}
+.tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--text-secondary,#888);border-bottom:2px solid transparent;transition:all 0.2s}
+.tab.active{color:#8B1A4A;border-color:#8B1A4A}
+/* Contact list */
+.contact-list{flex:1;overflow-y:auto;padding:6px}
+.contact-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background 0.15s;position:relative}
+.contact-item:hover,.contact-item.active{background:rgba(139,26,74,0.08)}
+.contact-item.active{background:rgba(139,26,74,0.12) !important}
+.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;position:relative}
+.avatar-wrap{position:relative;flex-shrink:0}
+.online-dot{position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;border:2px solid var(--card-bg,#fff)}
+.online-dot.online{background:#4CAF50}
+.online-dot.offline{background:#bbb}
+.contact-name{font-weight:600;font-size:0.84rem;color:var(--text-primary,#1a1a1a);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact-sub{font-size:0.72rem;color:var(--text-secondary,#888);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.unread-badge{background:#dc3545;color:#fff;border-radius:10px;padding:1px 7px;font-size:0.68rem;font-weight:700;flex-shrink:0;margin-left:auto}
+.search-box{padding:8px;border-bottom:1px solid var(--border-color,#f0f0f0);flex-shrink:0}
+.search-input{width:100%;padding:8px 12px;border:1px solid var(--border-color,#ddd);border-radius:20px;font-size:0.82rem;outline:none;background:var(--input-bg,#f5f5f5);color:var(--text-primary,#1a1a1a)}
+.search-input:focus{border-color:#8B1A4A;background:var(--card-bg,#fff)}
+/* Chat area */
+.chat-area{display:flex;flex-direction:column;height:100%}
+.chat-top{padding:12px 16px;border-bottom:1px solid var(--border-color,#f0f0f0);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chat-top-name{font-weight:700;font-size:0.9rem;color:var(--text-primary,#1a1a1a)}
+.chat-top-status{font-size:0.72rem;display:flex;align-items:center;gap:4px}
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg-row{display:flex;gap:8px;max-width:78%}
+.msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
+.msg-row.theirs{align-self:flex-start}
+.msg-av{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.msg-body{}
+.msg-name{font-size:0.68rem;color:var(--text-secondary,#aaa);margin-bottom:2px}
+.msg-row.mine .msg-name{text-align:right}
+.msg-bubble{padding:9px 13px;border-radius:16px;font-size:0.86rem;line-height:1.5;word-break:break-word}
+.msg-row.mine .msg-bubble{background:#8B1A4A;color:#fff;border-radius:16px 4px 16px 16px}
+.msg-row.theirs .msg-bubble{background:var(--table-header,#f2f2f2);color:var(--text-primary,#1a1a1a);border-radius:4px 16px 16px 16px}
+.msg-row.support .msg-bubble{background:rgba(139,26,74,0.1);color:var(--text-primary,#1a1a1a);border-radius:4px 16px 16px 16px}
+.msg-time{font-size:0.65rem;color:var(--text-secondary,#bbb);margin-top:3px}
+.msg-row.mine .msg-time{text-align:right}
+.input-bar{padding:12px 14px;border-top:1px solid var(--border-color,#f0f0f0);display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
+.msg-textarea{flex:1;padding:10px 14px;border:1px solid var(--border-color,#ddd);border-radius:20px;font-size:0.86rem;outline:none;background:var(--input-bg,#fff);color:var(--text-primary,#1a1a1a);resize:none;max-height:90px;font-family:inherit;line-height:1.4}
+.msg-textarea:focus{border-color:#8B1A4A}
+.send-btn{width:40px;height:40px;border-radius:50%;background:#8B1A4A;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.9rem;transition:all 0.2s}
+.send-btn:hover{background:#6d1439;transform:scale(1.05)}
+.send-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-secondary,#aaa);text-align:center;padding:32px}
+.empty-state i{font-size:2.5rem;margin-bottom:12px;color:rgba(139,26,74,0.2)}
+.empty-state p{font-size:0.83rem;max-width:220px;line-height:1.5}
+/* Dark */
+[data-theme="dark"] .chat-panel{background:var(--card-bg,#2d1520)!important;border-color:var(--border-color,#5d3040)!important}
+[data-theme="dark"] .panel-header,.tab-bar,.search-box,.chat-top,.input-bar{border-color:var(--border-color,#5d3040)!important}
+[data-theme="dark"] .panel-header-title,.chat-top-name,.contact-name{color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .contact-sub,.msg-name,.msg-time{color:var(--text-secondary,#a07080)!important}
+[data-theme="dark"] .contact-item:hover,[data-theme="dark"] .contact-item.active{background:rgba(139,26,74,0.15)!important}
+[data-theme="dark"] .search-input{background:var(--input-bg,#3d2030)!important;color:var(--text-primary,#f0e6ea)!important;border-color:var(--border-color,#5d3040)!important}
+[data-theme="dark"] .msg-textarea{background:var(--input-bg,#3d2030)!important;color:var(--text-primary,#f0e6ea)!important;border-color:var(--border-color,#5d3040)!important}
+[data-theme="dark"] .msg-row.theirs .msg-bubble,[data-theme="dark"] .msg-row.support .msg-bubble{background:rgba(139,26,74,0.15)!important;color:var(--text-primary,#f0e6ea)!important}
+[data-theme="dark"] .online-dot{border-color:var(--card-bg,#2d1520)!important}
+[data-theme="dark"] .tab{color:var(--text-secondary,#a07080)!important}
+[data-theme="dark"] .tab.active{color:#E8A020!important;border-color:#E8A020!important}
+@media(max-width:700px){.chat-layout{grid-template-columns:1fr}main{padding:12px}}
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div id="nav-container"></div>
+<main>
+<div class="chat-layout">
+  <!-- LEFT: contacts -->
+  <div class="chat-panel">
+    <div class="tab-bar">
+      <div class="tab active" id="tab-support" onclick="switchTab('support')">
+        <i class="fa-solid fa-headset"></i> Soporte
+      </div>
+      <div class="tab" id="tab-students" onclick="switchTab('students')">
+        <i class="fa-solid fa-users"></i> Estudiantes
+      </div>
+    </div>
+
+    <!-- Support tab -->
+    <div id="section-support" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+      <div class="contact-list" id="support-list">
+        <div style="text-align:center;padding:30px;color:var(--text-secondary,#aaa);font-size:0.82rem">
+          <i class="fa-solid fa-spinner fa-spin" style="display:block;font-size:1.5rem;margin-bottom:8px"></i>
+          Cargando conversaciones...
+        </div>
+      </div>
+      <div style="padding:8px;border-top:1px solid var(--border-color,#f0f0f0)">
+        <button onclick="startNewSupport()" style="width:100%;padding:9px;background:#8B1A4A;border:none;border-radius:20px;color:#fff;font-weight:700;cursor:pointer;font-size:0.82rem">
+          <i class="fa-solid fa-plus"></i> Nueva consulta
+        </button>
+      </div>
+    </div>
+
+    <!-- Students tab -->
+    <div id="section-students" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="Buscar estudiante..." oninput="searchStudents(this.value)">
+      </div>
+      <div class="contact-list" id="students-list">
+        <div style="text-align:center;padding:20px;color:var(--text-secondary,#aaa);font-size:0.82rem">Busca un estudiante</div>
+      </div>
+      <div style="padding:6px 8px;border-top:1px solid var(--border-color,#f0f0f0)">
+        <div style="font-size:0.72rem;color:var(--text-secondary,#aaa)">Tus conversaciones recientes</div>
+        <div class="contact-list" id="dm-contacts-list" style="max-height:120px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: chat window -->
+  <div class="chat-panel" id="chat-right">
+    <div class="empty-state">
+      <i class="fa-solid fa-comment-dots"></i>
+      <p>Selecciona una conversacion para comenzar a chatear</p>
+    </div>
+  </div>
+</div>
+</main>
+
+<script src="/theme.js"></script>
+<script src="/api.js"></script>
+<script src="/layout.js"></script>
+<script>
+let myProfile = null;
+let activeMode = null; // 'support' | 'dm'
+let activeId = null;   // convId for support, userId for dm
+let pollInterval = null;
+let heartbeatInterval = null;
+let searchTimeout = null;
+
+async function init() {
+  const u = requireAuth(); if (!u) return;
+  const pr = await UserAPI.getProfile();
+  if (!pr?.data) return;
+  myProfile = pr.data;
+  document.getElementById('header-container').innerHTML = renderHeader('Bienvenido, ' + myProfile.fullName.split(' ')[0], null, myProfile);
+  document.getElementById('nav-container').innerHTML = renderNav('chat');
+  initTheme();
+  await loadSupportConversations();
+  await loadDMContacts();
+  heartbeatInterval = setInterval(heartbeat, 30000);
+  heartbeat();
+}
+
+async function heartbeat() {
+  await apiRequest('/chat/heartbeat', {method:'POST'});
+}
+
+function switchTab(tab) {
+  document.getElementById('tab-support').className = 'tab' + (tab==='support'?' active':'');
+  document.getElementById('tab-students').className = 'tab' + (tab==='students'?' active':'');
+  document.getElementById('section-support').style.display = tab==='support' ? 'flex' : 'none';
+  document.getElementById('section-students').style.display = tab==='students' ? 'flex' : 'none';
+}
+
+// ── Support chat ────────────────────────────────────────────
+async function loadSupportConversations() {
+  const res = await apiRequest('/chat/my-conversations');
+  const convs = res?.data || [];
+  const el = document.getElementById('support-list');
+  if (!convs.length) {
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-secondary,#aaa);font-size:0.82rem"><i class="fa-solid fa-comments" style="display:block;font-size:1.8rem;margin-bottom:8px;opacity:0.3"></i>No tienes conversaciones de soporte aun</div>';
+    return;
+  }
+  el.innerHTML = convs.map(c => `
+    <div class="contact-item ${activeMode==='support'&&activeId===c.id?'active':''}" onclick="openSupport(${c.id})">
+      <div class="avatar-wrap">
+        <div style="width:38px;height:38px;border-radius:50%;background:#8B1A4A;display:flex;align-items:center;justify-content:center;color:#fff">
+          <i class="fa-solid fa-headset"></i>
+        </div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="contact-name">Soporte DUNAB ${c.assignedAdminName?'— '+c.assignedAdminName:''}</div>
+        <div class="contact-sub">${c.status==='CLOSED'?'Cerrada':'Activa'} · ${UI.formatDate(c.lastMessageAt)}</div>
+      </div>
+      ${c.unreadByStudent>0?`<span class="unread-badge">${c.unreadByStudent}</span>`:''}
+    </div>`).join('');
+}
+
+async function openSupport(convId) {
+  if (pollInterval) clearInterval(pollInterval);
+  activeMode = 'support';
+  activeId = convId;
+  await renderSupportChat(convId);
+  pollInterval = setInterval(() => refreshSupportMessages(convId), 3000);
+  await loadSupportConversations();
+}
+
+async function startNewSupport() {
+  // Open a new support chat (just open the write view)
+  activeMode = 'support-new';
+  activeId = null;
+  if (pollInterval) clearInterval(pollInterval);
+  const right = document.getElementById('chat-right');
+  right.innerHTML = `
+    <div class="chat-area">
+      <div class="chat-top">
+        <div style="width:36px;height:36px;border-radius:50%;background:#8B1A4A;display:flex;align-items:center;justify-content:center;color:#fff"><i class="fa-solid fa-headset"></i></div>
+        <div><div class="chat-top-name">Soporte DUNAB</div><div class="chat-top-status"><i class="fa-solid fa-circle" style="color:#4CAF50;font-size:0.45rem"></i> En linea</div></div>
+      </div>
+      <div class="messages">
+        <div class="empty-state">
+          <i class="fa-solid fa-comments"></i>
+          <p>Escribe tu primera consulta al equipo de soporte</p>
+        </div>
+      </div>
+      <div class="input-bar">
+        <textarea class="msg-textarea" id="support-input" placeholder="Escribe tu consulta..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendNewSupport();}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"></textarea>
+        <button class="send-btn" onclick="sendNewSupport()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>`;
+}
+
+async function sendNewSupport() {
+  const input = document.getElementById('support-input');
+  const content = input.value.trim();
+  if (!content) return;
+  // conversationId=null forces creation of NEW conversation
+  const res = await apiRequest('/chat/send', {method:'POST', body:JSON.stringify({content, conversationId:null})});
+  if (res?.success) {
+    await loadSupportConversations();
+    const convs = await apiRequest('/chat/my-conversations');
+    // Find the newest conversation (first in list since sorted by lastMessageAt desc)
+    const latest = convs?.data?.[0];
+    if (latest) { activeMode='support'; activeId=latest.id; await openSupport(latest.id); }
+  } else UI.toast(res?.message||'Error','error');
+}
+
+async function renderSupportChat(convId) {
+  // Get conversation info to check status
+  const convsRes = await apiRequest('/chat/my-conversations');
+  const conv = convsRes?.data?.find(c=>c.id===convId);
+  const isClosed = conv?.status === 'CLOSED';
+
+  const right = document.getElementById('chat-right');
+  right.innerHTML = `
+    <div class="chat-area">
+      <div class="chat-top">
+        <div style="width:36px;height:36px;border-radius:50%;background:#8B1A4A;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0"><i class="fa-solid fa-headset"></i></div>
+        <div>
+          <div class="chat-top-name">Soporte DUNAB${conv?.assignedAdminName?' — '+conv.assignedAdminName:''}</div>
+          <div class="chat-top-status">
+            ${isClosed
+              ? '<i class="fa-solid fa-lock" style="color:#888;font-size:0.7rem"></i> Conversacion cerrada'
+              : '<i class="fa-solid fa-circle" style="color:#4CAF50;font-size:0.45rem"></i> Activo'}
+          </div>
+        </div>
+      </div>
+      <div class="messages" id="msg-area-${convId}"></div>
+      ${isClosed
+        ? `<div style="padding:14px;text-align:center;border-top:1px solid var(--border-color,#f0f0f0);font-size:0.82rem;color:var(--text-secondary,#aaa)">
+             <i class="fa-solid fa-lock" style="margin-right:6px"></i>Esta conversacion fue cerrada por el equipo de soporte
+           </div>`
+        : `<div class="input-bar" id="support-input-bar-${convId}">
+             <textarea class="msg-textarea" id="msg-input-${convId}" placeholder="Escribe tu mensaje... (Enter para enviar)" rows="1"
+               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSupportMsg(${convId});}"
+               oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"></textarea>
+             <button class="send-btn" id="send-${convId}" onclick="sendSupportMsg(${convId})"><i class="fa-solid fa-paper-plane"></i></button>
+           </div>`}
+    </div>`;
+  await refreshSupportMessages(convId);
+}
+
+async function refreshSupportMessages(convId) {
+  const res = await apiRequest('/chat/conversations/'+convId+'/messages');
+  const msgs = res?.data || [];
+  const area = document.getElementById('msg-area-'+convId);
+  if (!area) return;
+  const atBottom = area.scrollHeight - area.clientHeight <= area.scrollTop + 60;
+  area.innerHTML = msgs.map(m => buildSupportMsg(m)).join('');
+  if (atBottom || msgs.length <= 2) area.scrollTop = area.scrollHeight;
+}
+
+function buildSupportMsg(m) {
+  const isMine = m.senderRole === 'STUDENT';
+  const cls = isMine ? 'mine' : 'support';
+  const av = isMine
+    ? `<img src="${myProfile?.profilePhotoUrl||`https://ui-avatars.com/api/?name=${encodeURIComponent(myProfile?.fullName||'E')}&background=8B1A4A&color=fff`}" class="msg-av">`
+    : `<div class="msg-av" style="background:#8B1A4A;display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-headset" style="color:#fff;font-size:0.65rem"></i></div>`;
+  return `<div class="msg-row ${cls}">
+    ${av}
+    <div class="msg-body">
+      <div class="msg-name">${m.senderName}</div>
+      <div class="msg-bubble">${escHtml(m.content)}</div>
+      <div class="msg-time">${UI.formatDate(m.sentAt)}</div>
+    </div>
+  </div>`;
+}
+
+async function sendSupportMsg(convId) {
+  const input = document.getElementById('msg-input-'+convId);
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) return;
+  const btn = document.getElementById('send-'+convId);
+  if (btn) btn.disabled = true;
+  // Pass conversationId to send to the correct conversation
+  const res = await apiRequest('/chat/send', {method:'POST', body:JSON.stringify({content, conversationId:convId})});
+  if (res?.success) { input.value=''; input.style.height=''; await refreshSupportMessages(convId); }
+  else UI.toast(res?.message||'Error','error');
+  if (btn) btn.disabled = false;
+}
+
+// ── Direct messages (student ↔ student) ────────────────────
+async function loadDMContacts() {
+  const res = await apiRequest('/chat/dm/contacts');
+  const contacts = res?.data || [];
+  const el = document.getElementById('dm-contacts-list');
+  if (!contacts.length) { el.innerHTML='<div style="font-size:0.75rem;color:var(--text-secondary,#aaa);padding:8px 4px">Sin conversaciones previas</div>'; return; }
+  el.innerHTML = contacts.map(c => contactItem(c, 'dm')).join('');
+}
+
+async function searchStudents(query) {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(async () => {
+    if (!query.trim()) { document.getElementById('students-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary,#aaa);font-size:0.82rem">Escribe para buscar</div>'; return; }
+    const res = await apiRequest('/chat/students/search?q='+encodeURIComponent(query));
+    const students = res?.data || [];
+    const el = document.getElementById('students-list');
+    if (!students.length) { el.innerHTML='<div style="text-align:center;padding:16px;color:var(--text-secondary,#aaa);font-size:0.82rem">Sin resultados</div>'; return; }
+    el.innerHTML = students.map(s => contactItem(s, 'dm')).join('');
+  }, 400);
+}
+
+function contactItem(u, mode) {
+  const av = u.profilePhotoUrl
+    ? `<img src="${u.profilePhotoUrl}" class="avatar">`
+    : `<div class="avatar" style="background:#8B1A4A;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.75rem;font-weight:700">${u.fullName?.[0]||'E'}</div>`;
+  const onlineDot = `<span class="online-dot ${u.online?'online':'offline'}"></span>`;
+  const unread = u.unread ? `<span class="unread-badge">${u.unread}</span>` : '';
+  return `<div class="contact-item ${activeMode==='dm'&&activeId===u.id?'active':''}" onclick="openDM(${u.id},'${u.fullName.replace(/'/g,"\\'")}',${!!u.online})">
+    <div class="avatar-wrap">${av}${onlineDot}</div>
+    <div style="flex:1;min-width:0">
+      <div class="contact-name">${u.fullName}</div>
+      <div class="contact-sub">${u.career||u.studentCode||''}</div>
+    </div>
+    ${unread}
+  </div>`;
+}
+
+async function openDM(userId, name, online) {
+  if (pollInterval) clearInterval(pollInterval);
+  activeMode = 'dm';
+  activeId = userId;
+  await renderDMChat(userId, name, online);
+  pollInterval = setInterval(() => refreshDM(userId), 3000);
+  await loadDMContacts();
+}
+
+async function renderDMChat(userId, name, online) {
+  const res = await apiRequest('/chat/students/search?q='+encodeURIComponent(name));
+  const user = res?.data?.find(u=>u.id===userId) || {id:userId,fullName:name,online};
+  const av = user.profilePhotoUrl
+    ? `<img src="${user.profilePhotoUrl}" style="width:36px;height:36px;border-radius:50%;object-fit:cover">`
+    : `<div style="width:36px;height:36px;border-radius:50%;background:#E8A020;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">${name[0]}</div>`;
+  document.getElementById('chat-right').innerHTML = `
+    <div class="chat-area">
+      <div class="chat-top">
+        <div style="position:relative;flex-shrink:0">${av}<span class="online-dot ${online?'online':'offline'}" style="position:absolute;bottom:1px;right:1px"></span></div>
+        <div>
+          <div class="chat-top-name">${name}</div>
+          <div class="chat-top-status" id="dm-status-${userId}">
+            <i class="fa-solid fa-circle" style="color:${online?'#4CAF50':'#bbb'};font-size:0.45rem"></i>
+            ${online?'En linea':'Desconectado'}
+          </div>
+        </div>
+      </div>
+      <div class="messages" id="dm-area-${userId}"></div>
+      <div class="input-bar">
+        <textarea class="msg-textarea" id="dm-input-${userId}" placeholder="Escribe un mensaje... (Enter para enviar)" rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDM(${userId});}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"></textarea>
+        <button class="send-btn" id="dm-send-${userId}" onclick="sendDM(${userId})"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>`;
+  await refreshDM(userId);
+}
+
+async function refreshDM(userId) {
+  const res = await apiRequest('/chat/dm/'+userId+'/messages');
+  const msgs = res?.data || [];
+  const area = document.getElementById('dm-area-'+userId);
+  if (!area) return;
+  const atBottom = area.scrollHeight - area.clientHeight <= area.scrollTop + 60;
+  area.innerHTML = msgs.length ? msgs.map(m => buildDMMsg(m)).join('') :
+    '<div class="empty-state"><i class="fa-solid fa-comment"></i><p>Sé el primero en enviar un mensaje</p></div>';
+  if (atBottom || msgs.length<=2) area.scrollTop = area.scrollHeight;
+}
+
+function buildDMMsg(m) {
+  const cls = m.isMine ? 'mine' : 'theirs';
+  const av = m.isMine
+    ? `<img src="${myProfile?.profilePhotoUrl||`https://ui-avatars.com/api/?name=${encodeURIComponent(myProfile?.fullName||'E')}&background=8B1A4A&color=fff`}" class="msg-av">`
+    : `<div class="msg-av" style="background:#E8A020;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.7rem">${m.senderName?.[0]||'E'}</div>`;
+  return `<div class="msg-row ${cls}">${av}<div class="msg-body"><div class="msg-name">${m.senderName}</div><div class="msg-bubble">${escHtml(m.content)}</div><div class="msg-time">${UI.formatDate(m.sentAt)}</div></div></div>`;
+}
+
+async function sendDM(userId) {
+  const input = document.getElementById('dm-input-'+userId);
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) return;
+  const btn = document.getElementById('dm-send-'+userId);
+  if (btn) btn.disabled = true;
+  const res = await apiRequest('/chat/dm/'+userId+'/send', {method:'POST', body:JSON.stringify({content})});
+  if (res?.success) { input.value=''; input.style.height=''; await refreshDM(userId); await loadDMContacts(); }
+  else UI.toast(res?.message||'Error','error');
+  if (btn) btn.disabled = false;
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+window.addEventListener('beforeunload', ()=>{ if(pollInterval)clearInterval(pollInterval); if(heartbeatInterval)clearInterval(heartbeatInterval); });
+init();
+</script>
+</body>
+</html>

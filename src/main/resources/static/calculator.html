@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<script>
+(function(){var t=localStorage.getItem('dunab_theme')||'light';document.documentElement.setAttribute('data-theme',t);var bg=t==='dark'?'#1a0a0f':'#8B1A4A';var card=t==='dark'?'#2d1520':'#fff';document.write('<style>html,body{background:'+bg+' !important}.card,.modal-box,.corte-box{background:'+card+' !important}</style>');})();
+</script>
+<link rel="stylesheet" href="/theme.css">
+<title>DUNAB - Calculadora de Notas</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh}
+main{padding:28px 36px;max-width:1100px;margin:0 auto}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:gap}
+.page-header h1{font-size:1.4rem;font-weight:700;color:#fff}
+.header-btns{display:flex;gap:10px}
+.btn-new{background:#E8A020;border:none;border-radius:20px;color:#fff;padding:10px 20px;font-weight:700;cursor:pointer;font-size:0.85rem}
+.btn-export-all{background:#8B1A4A;border:2px solid #fff;border-radius:20px;color:#fff;padding:10px 20px;font-weight:700;cursor:pointer;font-size:0.85rem}
+.subjects-grid{display:flex;flex-direction:column;gap:20px}
+.subject-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.subject-header{background:#8B1A4A;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.subject-name{font-size:1.1rem;font-weight:700;color:#fff}
+.subject-meta{font-size:0.8rem;color:rgba(255,255,255,0.7)}
+.subject-actions{display:flex;gap:8px}
+.btn-del-sub{background:none;border:1px solid rgba(255,255,255,0.4);border-radius:10px;color:#fff;padding:5px 10px;cursor:pointer;font-size:0.78rem}
+.btn-del-sub:hover{background:rgba(255,255,255,0.15)}
+.subject-body{padding:20px}
+.cortes-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.corte-box{border:1px solid #eee;border-radius:12px;padding:16px;background:#fff}
+.corte-title{font-size:0.9rem;font-weight:700;color:#8B1A4A;margin-bottom:4px}
+.corte-subtitle{font-size:0.75rem;color:#888;margin-bottom:12px}
+.activity-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f5f5}
+.activity-row:last-of-type{border-bottom:none}
+.activity-name{flex:1;font-size:0.85rem;color:#1a1a1a;font-weight:500}
+.activity-pct{font-size:0.78rem;color:#888;white-space:nowrap}
+.activity-grade{display:flex;align-items:center;gap:6px}
+.grade-input{width:60px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:0.82rem;text-align:center;outline:none}
+.grade-input:focus{border-color:#8B1A4A}
+.btn-save-grade{background:#4CAF50;border:none;border-radius:6px;color:#fff;padding:4px 8px;cursor:pointer;font-size:0.75rem}
+.btn-rm-entry{background:none;border:none;color:#ddd;cursor:pointer;font-size:0.82rem}
+.btn-rm-entry:hover{color:#dc3545}
+.btn-add-activity{background:none;border:1px dashed #8B1A4A;border-radius:8px;color:#8B1A4A;padding:6px 12px;cursor:pointer;font-size:0.8rem;width:100%;margin-top:8px}
+.btn-add-activity:hover{background:rgba(139,26,74,0.05)}
+.corte-grade-display{background:#f9f9f9;border-radius:8px;padding:10px;margin-top:10px;display:flex;justify-content:space-between;align-items:center}
+.corte-grade-num{font-size:1.4rem;font-weight:800;color:#8B1A4A}
+.corte-grade-label{font-size:0.75rem;color:#888}
+.pct-bar{background:#e0e0e0;border-radius:4px;height:4px;margin-top:6px;overflow:hidden}
+.pct-fill{height:100%;background:#8B1A4A;border-radius:4px}
+.final-box{background:linear-gradient(135deg,rgba(139,26,74,0.08),rgba(232,160,32,0.08));border:2px solid rgba(139,26,74,0.2);border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.final-grade-num{font-size:2.4rem;font-weight:900;color:#8B1A4A}
+.final-grade-label{font-size:0.78rem;color:#888}
+.max-possible{font-size:0.85rem;color:#666}
+.needed-info{font-size:0.82rem;color:#555;background:#fff8e6;border:1px solid #f5a623;border-radius:8px;padding:10px 14px;margin-top:12px;line-height:1.6}
+.badge-pass{background:#d4edda;color:#155724;padding:4px 12px;border-radius:12px;font-size:0.78rem;font-weight:600}
+.badge-fail{background:#f8d7da;color:#721c24;padding:4px 12px;border-radius:12px;font-size:0.78rem;font-weight:600}
+.empty{text-align:center;padding:48px;color:#aaa}
+/* Modal */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.modal-box{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:440px}
+.modal-title{font-size:1rem;font-weight:700;color:#1a1a1a;margin-bottom:18px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:0.82rem;font-weight:600;color:#333;margin-bottom:5px}
+.form-group input,.form-group select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.88rem;outline:none;background:#fff;color:#1a1a1a}
+.form-group input:focus,.form-group select:focus{border-color:#8B1A4A}
+.modal-actions{display:flex;gap:10px;margin-top:14px}
+.btn-cancel{flex:1;padding:10px;background:#f5f5f5;border:none;border-radius:20px;color:#555;cursor:pointer;font-weight:600}
+.btn-save{flex:2;padding:10px;background:#8B1A4A;border:none;border-radius:20px;color:#fff;font-weight:700;cursor:pointer}
+.hint{font-size:0.75rem;color:#888;margin-top:4px}
+@media(max-width:700px){.cortes-grid{grid-template-columns:1fr}.final-box{flex-direction:column}}
+
+/* Calculator dark mode fixes */
+[data-theme="dark"] .subject-card { background: var(--card-bg) !important; border-color: var(--border-color) !important; }
+[data-theme="dark"] .subject-header { background: #5d1a3a !important; }
+[data-theme="dark"] .corte-box { background: var(--card-bg) !important; border-color: var(--border-color) !important; }
+[data-theme="dark"] .corte-grade-display { background: var(--input-bg) !important; }
+[data-theme="dark"] .final-box { background: rgba(139,26,74,0.15) !important; border-color: rgba(139,26,74,0.3) !important; }
+[data-theme="dark"] .needed-info { background: rgba(232,160,32,0.1) !important; border-color: rgba(232,160,32,0.2) !important; color: #c09050 !important; }
+[data-theme="dark"] .activity-row { border-color: var(--border-color) !important; }
+[data-theme="dark"] .activity-name { color: var(--text-primary) !important; }
+[data-theme="dark"] .activity-pct { color: var(--text-secondary) !important; }
+[data-theme="dark"] .grade-input { background: var(--input-bg) !important; color: var(--text-primary) !important; border-color: var(--border-color) !important; }
+[data-theme="dark"] .corte-title { color: #f0c0d0 !important; }
+[data-theme="dark"] .corte-subtitle { color: var(--text-secondary) !important; }
+[data-theme="dark"] .btn-add-activity { border-color: #8B1A4A !important; color: #f0c0d0 !important; }
+[data-theme="dark"] .modal-box { background: var(--card-bg) !important; border: 1px solid var(--border-color) !important; }
+[data-theme="dark"] .modal-box h2 { color: var(--text-primary) !important; }
+[data-theme="dark"] .form-group label { color: var(--text-secondary) !important; }
+[data-theme="dark"] .form-group input { background: var(--input-bg) !important; color: var(--text-primary) !important; border-color: var(--border-color) !important; }
+[data-theme="dark"] .subject-name { color: #fff !important; }
+[data-theme="dark"] .subject-meta { color: rgba(255,255,255,0.6) !important; }
+[data-theme="dark"] .goal-name, [data-theme="dark"] .goal-amount, [data-theme="dark"] .goal-pct { color: var(--text-primary) !important; }
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div id="nav-container"></div>
+<main>
+  <div class="page-header">
+    <h1><i class="fa-solid fa-graduation-cap"></i> Calculadora de Notas</h1>
+    <div class="header-btns">
+      <button class="btn-export-all" onclick="exportAllPDF()"><i class="fa-solid fa-file-pdf"></i> Exportar PDF</button>
+      <button class="btn-new" onclick="openNewSubjectModal()">+ Nueva Materia</button>
+    </div>
+  </div>
+  <div class="subjects-grid" id="subjects-container">
+    <div class="empty">Cargando materias...</div>
+  </div>
+</main>
+
+<!-- Modal nueva materia -->
+<div class="modal" id="modal-subject">
+  <div class="modal-box">
+    <div class="modal-title">Nueva Materia</div>
+    <div class="form-group"><label>Nombre de la materia *</label><input type="text" id="s-name" placeholder="Ej: Estructuras de Datos"></div>
+    <div class="form-group"><label>Créditos</label><input type="number" id="s-credits" placeholder="Ej: 3" min="1" max="10"></div>
+    <div class="form-group"><label>Período académico</label><input type="text" id="s-period" placeholder="Ej: 2024-1"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-subject')">Cancelar</button>
+      <button class="btn-save" onclick="createSubject()">Crear materia</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nueva actividad -->
+<div class="modal" id="modal-activity">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-activity-title">Agregar Actividad</div>
+    <div class="form-group">
+      <label>Corte</label>
+      <select id="a-corte">
+        <option value="1">Corte 1 (pesa 50% del semestre)</option>
+        <option value="2">Corte 2 (pesa 50% del semestre)</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Nombre de la actividad *</label><input type="text" id="a-name" placeholder="Ej: Parcial 1, Talleres, Proyecto..."></div>
+    <div class="form-group">
+      <label>Porcentaje dentro del corte *</label>
+      <input type="number" id="a-pct" placeholder="Ej: 30" min="1" max="100" step="0.5">
+      <div class="hint">Los porcentajes de todas las actividades del corte deben sumar 100%</div>
+    </div>
+    <div class="form-group">
+      <label>Nota obtenida (dejar vacío si aún no hay nota)</label>
+      <input type="number" id="a-grade" placeholder="0.0 - 5.0" min="0" max="5" step="0.1">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-activity')">Cancelar</button>
+      <button class="btn-save" onclick="addActivity()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<script src="/theme.js"></script>
+<script src="/api.js"></script>
+<script src="/layout.js"></script>
+<script>
+// API de notas
+const GradeAPI = {
+  getSubjects: () => apiRequest('/grades/subjects'),
+  createSubject: (data) => apiRequest('/grades/subjects', {method:'POST', body:JSON.stringify(data)}),
+  deleteSubject: (id) => apiRequest('/grades/subjects/'+id, {method:'DELETE'}),
+  addEntry: (subjectId, data) => apiRequest('/grades/subjects/'+subjectId+'/entries', {method:'POST', body:JSON.stringify(data)}),
+  updateGrade: (entryId, grade) => apiRequest('/grades/entries/'+entryId, {method:'PUT', body:JSON.stringify({grade})}),
+  deleteEntry: (entryId) => apiRequest('/grades/entries/'+entryId, {method:'DELETE'}),
+};
+
+let subjects = [];
+let activeSubjectId = null;
+
+async function init() {
+  const u = requireAuth(); if (!u) return;
+  const pr = await UserAPI.getProfile();
+  if (pr?.data) {
+    document.getElementById('header-container').innerHTML = renderHeader('Calculadora de Notas','', pr.data);
+    document.getElementById('nav-container').innerHTML = renderNav('calculator');
+    initTheme();
+  }
+  await loadSubjects();
+}
+
+async function loadSubjects() {
+  const res = await GradeAPI.getSubjects();
+  subjects = res?.data || [];
+  const container = document.getElementById('subjects-container');
+  if (subjects.length === 0) {
+    container.innerHTML = '<div class="empty">No tienes materias aún.<br>Crea tu primera materia con el botón "+ Nueva Materia"</div>';
+    return;
+  }
+  container.innerHTML = subjects.map(s => renderSubject(s)).join('');
+  initTheme();
+}
+
+function renderSubject(s) {
+  const c1 = s.corte1;
+  const c2 = s.corte2;
+  const passing = s.passing;
+
+  const renderEntries = (entries, corte) => {
+    if (entries.length === 0) return '<div style="color:#aaa;font-size:0.8rem;padding:8px 0">Sin actividades aún</div>';
+    return entries.map(e => `
+      <div class="activity-row">
+        <div class="activity-name">${e.activityName}</div>
+        <div class="activity-pct">${e.percentage}%</div>
+        <div class="activity-grade">
+          <input type="number" class="grade-input" id="grade-${e.id}"
+            value="${e.graded ? e.grade : ''}" placeholder="-" min="0" max="5" step="0.1"
+            onkeydown="if(event.key==='Enter') saveGrade(${e.id})">
+          <button class="btn-save-grade" onclick="saveGrade(${e.id})"><i class="fa-solid fa-check"></i></button>
+          <button class="btn-rm-entry" onclick="removeEntry(${e.id})" title="Eliminar">×</button>
+        </div>
+      </div>`).join('');
+  };
+
+  const c1Fill = Math.round((c1.percentageDone / 100) * 100);
+  const c2Fill = Math.round((c2.percentageDone / 100) * 100);
+  const c1TotalFill = Math.round((c1.percentageTotal / 100) * 100);
+  const c2TotalFill = Math.round((c2.percentageTotal / 100) * 100);
+
+  const gradeColor = (g) => g >= 3.0 ? '#4CAF50' : g > 0 ? '#dc3545' : '#8B1A4A';
+
+  return `
+  <div class="subject-card" id="subj-${s.id}">
+    <div class="subject-header">
+      <div>
+        <div class="subject-name">${s.name}</div>
+        <div class="subject-meta">${s.credits ? s.credits+' créditos' : ''} ${s.academicPeriod ? '· '+s.academicPeriod : ''}</div>
+      </div>
+      <div class="subject-actions">
+        <button class="btn-del-sub" onclick="deleteSubject(${s.id})"><i class="fa-solid fa-trash"></i> Eliminar</button>
+      </div>
+    </div>
+    <div class="subject-body">
+      <div class="cortes-grid">
+        <!-- CORTE 1 -->
+        <div class="corte-box">
+          <div class="corte-title"><i class="fa-solid fa-clipboard-list"></i> Corte 1</div>
+          <div class="corte-subtitle">Pesa 50% de la nota final</div>
+          ${renderEntries(c1.entries, 1)}
+          <button class="btn-add-activity" onclick="openActivityModal(${s.id}, 1)">+ Agregar actividad al Corte 1</button>
+          <div class="corte-grade-display">
+            <div>
+              <div class="corte-grade-label">Nota del corte</div>
+              <div class="corte-grade-num" style="color:${gradeColor(c1.currentGrade)}">${c1.currentGrade.toFixed(2)}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="corte-grade-label">Calificado: ${c1.percentageDone}% / Total: ${c1.percentageTotal}%</div>
+              <div class="pct-bar" style="width:120px">
+                <div class="pct-fill" style="width:${c1TotalFill}%;background:#ddd"></div>
+                <div class="pct-fill" style="width:${c1Fill}%;margin-top:-4px;background:#8B1A4A"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- CORTE 2 -->
+        <div class="corte-box">
+          <div class="corte-title"><i class="fa-solid fa-clipboard-list"></i> Corte 2</div>
+          <div class="corte-subtitle">Pesa 50% de la nota final</div>
+          ${renderEntries(c2.entries, 2)}
+          <button class="btn-add-activity" onclick="openActivityModal(${s.id}, 2)">+ Agregar actividad al Corte 2</button>
+          <div class="corte-grade-display">
+            <div>
+              <div class="corte-grade-label">Nota del corte</div>
+              <div class="corte-grade-num" style="color:${gradeColor(c2.currentGrade)}">${c2.currentGrade.toFixed(2)}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="corte-grade-label">Calificado: ${c2.percentageDone}% / Total: ${c2.percentageTotal}%</div>
+              <div class="pct-bar" style="width:120px">
+                <div class="pct-fill" style="width:${c2TotalFill}%;background:#ddd"></div>
+                <div class="pct-fill" style="width:${c2Fill}%;margin-top:-4px;background:#8B1A4A"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- NOTA FINAL -->
+      <div class="final-box">
+        <div>
+          <div style="font-size:0.8rem;color:#888;margin-bottom:4px">Nota final actual</div>
+          <div class="final-grade-num" style="color:${gradeColor(s.finalGrade)}">${s.finalGrade.toFixed(2)}</div>
+          <div class="final-grade-label">/ 5.0 &nbsp; <span class="${passing?'badge-pass':'badge-fail'}">${passing?'<i class="fa-solid fa-circle-check" style="color:#4CAF50"></i> Aprobando':'<i class="fa-solid fa-triangle-exclamation" style="color:#E8A020"></i> En riesgo'}</span></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:0.8rem;color:#888">Máximo posible</div>
+          <div style="font-size:1.4rem;font-weight:700;color:#888">${s.maxPossible.toFixed(2)}</div>
+        </div>
+      </div>
+      ${s.neededInfo ? `<div class="needed-info"><i class="fa-solid fa-lightbulb"></i> ${s.neededInfo}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// Modales
+function openNewSubjectModal() {
+  document.getElementById('s-name').value = '';
+  document.getElementById('s-credits').value = '';
+  document.getElementById('s-period').value = '';
+  openModal('modal-subject');
+}
+
+function openActivityModal(subjectId, corte) {
+  activeSubjectId = subjectId;
+  document.getElementById('a-corte').value = corte;
+  document.getElementById('a-name').value = '';
+  document.getElementById('a-pct').value = '';
+  document.getElementById('a-grade').value = '';
+  const sub = subjects.find(s => s.id === subjectId);
+  document.getElementById('modal-activity-title').textContent =
+    `Agregar Actividad — ${sub?.name || ''}`;
+  openModal('modal-activity');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+async function createSubject() {
+  const name = document.getElementById('s-name').value.trim();
+  const credits = parseInt(document.getElementById('s-credits').value) || null;
+  const period = document.getElementById('s-period').value.trim() || null;
+  if (!name) { UI.toast('Ingresa el nombre de la materia','error'); return; }
+  try {
+    const res = await GradeAPI.createSubject({name, credits, academicPeriod: period});
+    if (res?.success) { UI.toast('Materia creada <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success'); closeModal('modal-subject'); await loadSubjects(); }
+    else UI.toast(res?.message||'Error','error');
+  } catch(err) { UI.toast(err.message,'error'); }
+}
+
+async function addActivity() {
+  const corte = parseInt(document.getElementById('a-corte').value);
+  const name = document.getElementById('a-name').value.trim();
+  const pct = parseFloat(document.getElementById('a-pct').value);
+  const gradeVal = document.getElementById('a-grade').value;
+  const grade = gradeVal !== '' ? parseFloat(gradeVal) : null;
+  if (!name) { UI.toast('Ingresa el nombre de la actividad','error'); return; }
+  if (!pct || pct <= 0) { UI.toast('Ingresa el porcentaje','error'); return; }
+  if (grade !== null && (grade < 0 || grade > 5)) { UI.toast('La nota debe estar entre 0.0 y 5.0','error'); return; }
+  try {
+    const res = await GradeAPI.addEntry(activeSubjectId, {corte, activityName: name, percentage: pct, grade});
+    if (res?.success) { UI.toast('Actividad agregada <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success'); closeModal('modal-activity'); await loadSubjects(); }
+    else UI.toast(res?.message||'Error','error');
+  } catch(err) { UI.toast(err.message,'error'); }
+}
+
+async function saveGrade(entryId) {
+  const input = document.getElementById('grade-'+entryId);
+  const val = input.value;
+  const grade = val !== '' ? parseFloat(val) : null;
+  if (grade !== null && (grade < 0 || grade > 5)) { UI.toast('La nota debe estar entre 0.0 y 5.0','error'); return; }
+  try {
+    const res = await GradeAPI.updateGrade(entryId, grade);
+    if (res?.success) { UI.toast('Nota guardada <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success'); await loadSubjects(); }
+    else UI.toast(res?.message||'Error','error');
+  } catch(err) { UI.toast(err.message,'error'); }
+}
+
+async function removeEntry(entryId) {
+  if (!confirm('¿Eliminar esta actividad?')) return;
+  try {
+    const res = await GradeAPI.deleteEntry(entryId);
+    if (res?.success) { await loadSubjects(); }
+  } catch(err) { UI.toast(err.message,'error'); }
+}
+
+async function deleteSubject(id) {
+  if (!confirm('¿Eliminar esta materia y todas sus notas?')) return;
+  try {
+    const res = await GradeAPI.deleteSubject(id);
+    if (res?.success) { UI.toast('Materia eliminada','success'); await loadSubjects(); }
+  } catch(err) { UI.toast(err.message,'error'); }
+}
+
+function exportAllPDF() {
+  const user = Auth.getUser();
+  if (subjects.length === 0) { UI.toast('No tienes materias para exportar','error'); return; }
+  const rows = subjects.map(s => {
+    const status = s.passing ? '<i class="fa-solid fa-circle-check" style="color:#4CAF50"></i> Aprobando' : '<i class="fa-solid fa-triangle-exclamation" style="color:#E8A020"></i> En riesgo';
+    const c1Acts = s.corte1.entries.map(e =>
+      `<tr><td style="padding-left:20px">Corte 1 - ${e.activityName}</td><td>${e.percentage}%</td><td>${e.graded ? e.grade.toFixed(1) : 'Pendiente'}</td><td>${e.graded ? (e.contribution).toFixed(2) : '-'}</td></tr>`
+    ).join('');
+    const c2Acts = s.corte2.entries.map(e =>
+      `<tr><td style="padding-left:20px">Corte 2 - ${e.activityName}</td><td>${e.percentage}%</td><td>${e.graded ? e.grade.toFixed(1) : 'Pendiente'}</td><td>${e.graded ? (e.contribution).toFixed(2) : '-'}</td></tr>`
+    ).join('');
+    return `<tr style="background:#f5f5f5;font-weight:bold"><td colspan="4">${s.name} — Nota Final: ${s.finalGrade.toFixed(2)} ${status}</td></tr>
+      ${c1Acts}${c2Acts}`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>body{font-family:Arial;padding:30px}h1{color:#8B1A4A}
+  table{width:100%;border-collapse:collapse;margin-top:16px}
+  th{background:#8B1A4A;color:#fff;padding:10px;text-align:left}
+  td{padding:8px 10px;border-bottom:1px solid #eee}
+  .footer{margin-top:24px;font-size:0.8rem;color:#aaa}</style></head>
+  <body><h1><i class="fa-solid fa-graduation-cap"></i> Mis Notas — DUNAB UNAB</h1>
+  <p>Estudiante: <strong>${user?.fullName||''}</strong> | Código: ${user?.studentCode||''} | Fecha: ${new Date().toLocaleDateString('es-CO')}</p>
+  <table><thead><tr><th>Materia / Actividad</th><th>Porcentaje</th><th>Nota</th><th>Aporte al corte</th></tr></thead>
+  <tbody>${rows}</tbody></table>
+  <div class="footer">Generado por DUNAB — Sistema de Gestión de Dinero UNAB<br>Cada corte pesa 50% de la nota final. Nota mínima para pasar: 3.0/5.0</div>
+  </body></html>`;
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(), 500);
+}
+
+init();
+</script>
+</body>
+</html>

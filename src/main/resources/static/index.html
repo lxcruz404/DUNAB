@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>DUNAB - Sistema de Gestion de Dinero UNAB</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px}
+.logo-wrap{margin-bottom:32px;text-align:center}
+.logo-wrap img{height:90px;object-fit:contain;filter:brightness(0) invert(1);opacity:0.95}
+.logo-wrap .univ-name{color:rgba(255,255,255,0.7);font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;margin-top:10px;display:block}
+h1{font-size:1.8rem;color:#fff;font-weight:700;margin-bottom:12px;text-align:center;max-width:560px}
+.subtitle{color:rgba(255,255,255,0.75);font-size:1rem;margin-bottom:40px;text-align:center;max-width:500px;line-height:1.6}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;width:100%;max-width:680px}
+.feature{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px;text-align:center}
+.feature i{font-size:1.8rem;color:rgba(255,255,255,0.8);margin-bottom:10px}
+.feature-name{font-size:0.88rem;font-weight:600;color:#fff;margin-bottom:4px}
+.feature-desc{font-size:0.75rem;color:rgba(255,255,255,0.6);line-height:1.4}
+.btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn{padding:14px 40px;border-radius:25px;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:#fff;color:#8B1A4A;border:none}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+.btn-sec{background:transparent;color:#fff;border:2px solid rgba(255,255,255,0.5)}
+.btn-sec:hover{border-color:#fff;background:rgba(255,255,255,0.1)}
+@media(max-width:600px){.features{grid-template-columns:1fr 1fr}.h1{font-size:1.4rem}}
+</style>
+</head>
+<body>
+  <div class="logo-wrap">
+    <img src="/logo-unab.png" alt="Universidad UNAB" onerror="this.style.display='none'">
+    <span class="univ-name">Universidad Autónoma de Bucaramanga</span>
+  </div>
+  <h1>Sistema de Gestion de Dinero UNAB</h1>
+  <p class="subtitle">Controla tu DUNAB, participa en encuentros universitarios, alcanza tus metas de ahorro y lleva el seguimiento de tus notas.</p>
+  <div class="features">
+    <div class="feature">
+      <div><i class="fa-solid fa-coins"></i></div>
+      <div class="feature-name">Seguimiento DUNAB</div>
+      <div class="feature-desc">Registra ingresos y gastos con comprobante</div>
+    </div>
+    <div class="feature">
+      <div><i class="fa-solid fa-trophy"></i></div>
+      <div class="feature-name">Encuentros UNAB</div>
+      <div class="feature-desc">Participa y gana puntos DUNAB en actividades</div>
+    </div>
+    <div class="feature">
+      <div><i class="fa-solid fa-graduation-cap"></i></div>
+      <div class="feature-name">Calculadora de Notas</div>
+      <div class="feature-desc">Gestiona tus notas por cortes y materias</div>
+    </div>
+    <div class="feature">
+      <div><i class="fa-solid fa-bullseye"></i></div>
+      <div class="feature-name">Metas de Ahorro</div>
+      <div class="feature-desc">Define y sigue tus objetivos financieros</div>
+    </div>
+    <div class="feature">
+      <div><i class="fa-solid fa-crown"></i></div>
+      <div class="feature-name">Ranking DUNAB</div>
+      <div class="feature-desc">Compite con otros estudiantes UNAB</div>
+    </div>
+    <div class="feature">
+      <div><i class="fa-solid fa-medal"></i></div>
+      <div class="feature-name">Logros</div>
+      <div class="feature-desc">Desbloquea insignias por tus actividades</div>
+    </div>
+  </div>
+  <div class="btns">
+    <a href="/login.html" class="btn btn-primary">
+      <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesion
+    </a>
+    <a href="/register.html" class="btn btn-sec">
+      <i class="fa-solid fa-user-plus"></i> Crear Cuenta
+    </a>
+  </div>
+<script src="/api.js"></script>
+<script>if(Auth.isLoggedIn()) window.location.href=Auth.isAdmin()?'/admin.html':'/dashboard.html';</script>
+</body>
+</html>

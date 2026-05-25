@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<script>
+(function(){
+  var t=localStorage.getItem("dunab_theme")||"light";
+  document.documentElement.setAttribute("data-theme",t);
+  document.documentElement.style.background=t==="dark"?"#1a0a0f":"#8B1A4A";
+})();
+</script>
+<link rel="stylesheet" href="/theme.css">
+<title>DUNAB - Encuentros</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh}
+  main{padding:28px 36px;max-width:1000px;margin:0 auto}
+  .card{background:#fff;border-radius:16px;padding:28px;margin-bottom:20px}
+  .card-title{font-size:1.1rem;font-weight:700;color:#1a1a1a;text-align:center;margin-bottom:6px}
+  .card-sub{text-align:center;color:#666;font-size:0.83rem;margin-bottom:20px}
+  .enc-list{display:flex;flex-direction:column;gap:12px}
+  .enc-item{border:1px solid #eee;border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s}
+  .enc-item:hover{border-color:#8B1A4A;box-shadow:0 4px 12px rgba(139,26,74,0.1)}
+  .enc-info .title{font-weight:700;font-size:0.95rem;color:#1a1a1a;margin-bottom:4px}
+  .enc-info .meta{font-size:0.8rem;color:#888}
+  .enc-right{text-align:right}
+  .enc-reward{font-size:1.1rem;font-weight:700;color:#E8A020;margin-bottom:6px}
+  .enc-type{display:inline-block;padding:3px 10px;border-radius:10px;font-size:0.72rem;font-weight:600;background:#fde8f5;color:#8B1A4A}
+  .btn-inscribir{background:#8B1A4A;border:none;border-radius:16px;color:#fff;padding:7px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;margin-top:6px}
+  .btn-inscribir:hover{background:#6d1439}
+  .btn-inscribir.inscrito{background:#4CAF50}
+  .btn-cobrar{background:#E8A020;border:none;border-radius:16px;color:#fff;padding:7px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;margin-top:6px;margin-left:6px}
+  .btn-cobrado{background:#e0e0e0;border:none;border-radius:16px;color:#888;padding:7px 16px;font-size:0.82rem;cursor:not-allowed;margin-top:6px}
+  .empty{text-align:center;padding:40px;color:#aaa}
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div id="nav-container"></div>
+<main>
+  <div class="card">
+    <div class="card-title">Registro de Actividad DUNAB</div>
+    <div class="card-sub">Participa en encuentros universitarios y gana DUNAB. La aprobación está sujeta a la asistencia.</div>
+    <div id="enc-list"><div class="empty">Cargando encuentros...</div></div>
+  </div>
+</main>
+<script src="/theme.js"></script>
+<script src="/api.js"></script>
+<script src="/layout.js"></script>
+<script>
+requireAuth();
+const typeIcons = {DEPORTIVO:'<i class="fa-solid fa-futbol"></i>',ACADEMICO:'<i class="fa-solid fa-book"></i>',CULTURAL:'<i class="fa-solid fa-masks-theater"></i>',TECNOLOGICO:'<i class="fa-solid fa-laptop-code"></i>',SOCIAL:'<i class="fa-solid fa-handshake"></i>'};
+
+async function init() {
+  const pr = await UserAPI.getProfile();
+  if (pr?.data) {
+    document.getElementById('header-container').innerHTML = renderHeader('Registro de Actividad DUNAB','', pr.data);
+    document.getElementById('nav-container').innerHTML = renderNav('encounters');
+    initTheme();
+  }
+  const res = await EncounterAPI.getAll();
+  const list = document.getElementById('enc-list');
+  if (!res?.data || res.data.length === 0) {
+    list.innerHTML = '<div class="empty">No hay encuentros disponibles por ahora.</div>';
+    return;
+  }
+  list.className = 'enc-list';
+  list.innerHTML = res.data.map(enc => {
+    const date = new Date(enc.encounterDate);
+    const dateStr = date.toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+    let actions = '';
+    if (enc.dunabCollected) {
+      actions = `<button class="btn-cobrado" disabled><i class="fa-solid fa-circle-check" style="color:#4CAF50"></i> DUNAB cobrado</button>`;
+    } else if (enc.userRegistered) {
+      actions = `<button class="btn-inscribir inscrito" disabled><i class="fa-solid fa-check"></i> Inscrito</button>
+        <button class="btn-cobrar" onclick="collect(${enc.id},this)">Cobrar ${Math.round(enc.dunabReward)} D</button>`;
+    } else if (enc.status === 'ACTIVO') {
+      actions = `<button class="btn-inscribir" onclick="register(${enc.id},this)">Inscribirse</button>`;
+    } else {
+      actions = `<button class="btn-inscribir" disabled style="opacity:.4">Cerrado</button>`;
+    }
+    return `<div class="enc-item">
+        <div class="enc-info">
+          <div class="title">${typeIcons[enc.type]||'<i class="fa-solid fa-medal"></i>'} ${enc.title}</div>
+          <div class="meta"><i class="fa-regular fa-calendar"></i> ${dateStr}${enc.location?` · <i class="fa-solid fa-location-dot"></i> ${enc.location}`:''}</div>
+          <div class="meta"><i class="fa-solid fa-users"></i> ${enc.registrationCount} inscritos${enc.maxParticipants?' / '+enc.maxParticipants+' cupos':''}</div>
+        </div>
+        <div class="enc-right">
+          <div class="enc-reward">+${Math.round(enc.dunabReward)} DUNAB</div>
+          <span class="enc-type">${enc.type}</span>
+          <div>${actions}</div>
+        </div>
+      </div>`;
+  }).join('');
+  initTheme();
+}
+
+async function register(id, btn) {
+  UI.setButtonLoading(btn, true);
+  try {
+    const res = await EncounterAPI.register(id);
+    if (res?.success) { UI.toast('¡Inscripción exitosa! <i class="fa-solid fa-party-horn"></i>','success'); await init(); }
+    else UI.toast(res?.message||'Error','error');
+  } catch(err) { UI.toast(err.message,'error'); }
+  finally { UI.setButtonLoading(btn, false); }
+}
+
+async function collect(id, btn) {
+  UI.setButtonLoading(btn, true);
+  try {
+    const res = await EncounterAPI.collect(id);
+    if (res?.success) { UI.toast('¡DUNAB cobrado! <i class="fa-solid fa-coins"></i>','success'); await init(); }
+    else UI.toast(res?.message||'Error','error');
+  } catch(err) { UI.toast(err.message,'error'); }
+  finally { UI.setButtonLoading(btn, false); }
+}
+
+init();
+</script>
+</body>
+</html>

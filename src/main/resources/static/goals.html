@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<script>
+(function(){
+  var t=localStorage.getItem("dunab_theme")||"light";
+  document.documentElement.setAttribute("data-theme",t);
+  document.documentElement.style.background=t==="dark"?"#1a0a0f":"#8B1A4A";
+})();
+</script>
+<link rel="stylesheet" href="/theme.css">
+<title>DUNAB - Metas de Ahorro</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh}
+  main{padding:28px 36px;max-width:1100px;margin:0 auto}
+  .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+  .page-header h1{font-size:1.4rem;font-weight:700;color:#fff}
+  .btn-new{background:#E8A020;border:none;border-radius:20px;color:#fff;padding:10px 22px;font-weight:700;cursor:pointer;font-size:0.88rem}
+  .card{background:#fff;border-radius:16px;padding:28px}
+  .card-title{font-size:1.2rem;font-weight:700;color:#1a1a1a;margin-bottom:24px;text-align:center}
+  .goals-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .goal-item{border:1px solid #eee;border-radius:12px;padding:18px}
+  .goal-name{font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:4px}
+  .goal-amount{color:#666;font-size:0.83rem;margin-bottom:12px}
+  .prog-bar{background:#e0e0e0;border-radius:10px;height:8px;margin-bottom:8px;overflow:hidden}
+  .prog-fill{height:100%;border-radius:10px;transition:width 0.5s}
+  .goal-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  .btn-detail{background:#8B1A4A;border:none;border-radius:16px;color:#fff;padding:7px 16px;font-size:0.8rem;font-weight:600;cursor:pointer}
+  .btn-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.85rem}
+  .btn-del:hover{color:#dc3545}
+  .goal-status{font-size:0.75rem;color:#888}
+  .export-row{text-align:right;margin-top:16px}
+  .btn-export{background:#8B1A4A;border:none;border-radius:20px;color:#fff;padding:9px 20px;font-size:0.85rem;font-weight:600;cursor:pointer}
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+  .modal.show{display:flex}
+  .modal-box{background:#fff;border-radius:16px;padding:32px;width:100%;max-width:420px}
+  .modal-box h2{font-size:1.1rem;font-weight:700;margin-bottom:20px;color:#1a1a1a}
+  .form-group{margin-bottom:14px}
+  .form-group label{display:block;font-size:0.85rem;font-weight:600;color:#333;margin-bottom:6px}
+  .form-group input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.88rem;outline:none}
+  .form-group input:focus{border-color:#8B1A4A}
+  .modal-actions{display:flex;gap:12px;margin-top:8px}
+  .btn-cancel{flex:1;padding:10px;background:#f5f5f5;border:none;border-radius:20px;color:#555;cursor:pointer;font-weight:600}
+  .btn-save{flex:2;padding:10px;background:#8B1A4A;border:none;border-radius:20px;color:#fff;font-weight:700;cursor:pointer}
+  .empty{text-align:center;padding:48px;color:#aaa;grid-column:1/-1}
+  @media(max-width:640px){.goals-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div id="nav-container"></div>
+<main>
+  <div class="page-header">
+    <h1>Metas personales de ahorro</h1>
+    <button class="btn-new" onclick="showModal()">+ Nueva Meta</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Mis Metas de Ahorro</div>
+    <div class="goals-grid" id="goals-grid"><div class="empty">Cargando...</div></div>
+    <div class="export-row"><button class="btn-export" onclick="exportPDF()">Exportar PDF →</button></div>
+  </div>
+</main>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2>Nueva meta de ahorro</h2>
+    <div class="form-group"><label>Nombre de la meta</label><input type="text" id="g-name" placeholder="Ej: Ahorro matrícula"></div>
+    <div class="form-group"><label>Meta en DUNAB</label><input type="number" id="g-target" placeholder="Ej: 10000" min="1"></div>
+    <div class="form-group"><label>Fecha límite (opcional)</label><input type="date" id="g-date"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="hideModal()">Cancelar</button>
+      <button class="btn-save" id="save-btn" onclick="createGoal()">Crear meta</button>
+    </div>
+  </div>
+</div>
+
+<script src="/theme.js"></script>
+<script src="/api.js"></script>
+<script src="/layout.js"></script>
+<script>
+requireAuth();
+const COLORS = ['#8B4A8B','#4CAF50','#00BCD4','#FF9800','#2196F3','#E91E63'];
+let goalsData = [];
+
+async function init() {
+  const pr = await UserAPI.getProfile();
+  if (pr?.data) {
+    document.getElementById('header-container').innerHTML = renderHeader('Metas personales de ahorro','', pr.data);
+    document.getElementById('nav-container').innerHTML = renderNav('goals');
+    initTheme();
+  }
+  const res = await GoalAPI.getAll();
+  goalsData = res?.data || [];
+  const grid = document.getElementById('goals-grid');
+  if (goalsData.length === 0) {
+    grid.innerHTML = '<div class="empty">No tienes metas aún.<br>¡Crea tu primera meta de ahorro!</div>';
+    return;
+  }
+  grid.innerHTML = goalsData.map((g,i) => `
+    <div class="goal-item">
+      <div class="goal-name">Meta #${i+1}: ${g.name}</div>
+      <div class="goal-amount">Meta: ${UI.formatDunab(g.targetAmount)} · Actual: ${UI.formatDunab(g.currentAmount)}</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(g.progressPercentage,100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+      <div class="goal-footer">
+        <button class="btn-detail" onclick="syncGoal(${g.id})">↻ Sincronizar</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="goal-status">${Math.round(g.progressPercentage)}% · ${g.status}</span>
+          <button class="btn-del" onclick="deleteGoal(${g.id})" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  initTheme();
+}
+
+function exportPDF() {
+  if (goalsData.length === 0) { UI.toast('No hay metas para exportar','error'); return; }
+  const u = Auth.getUser();
+  let content = `DUNAB - Metas de Ahorro\n`;
+  content += `Estudiante: ${u?.fullName || ''} | Código: ${u?.studentCode || ''}\n`;
+  content += `Fecha: ${new Date().toLocaleDateString('es-CO')}\n\n`;
+  goalsData.forEach((g,i) => {
+    content += `Meta #${i+1}: ${g.name}\n`;
+    content += `  Objetivo: ${UI.formatDunab(g.targetAmount)}\n`;
+    content += `  Acumulado: ${UI.formatDunab(g.currentAmount)}\n`;
+    content += `  Progreso: ${Math.round(g.progressPercentage)}%\n`;
+    content += `  Estado: ${g.status}\n`;
+    if (g.targetDate) content += `  Fecha límite: ${UI.formatDate(g.targetDate)}\n`;
+    content += '\n';
+  });
+  const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'metas-dunab.txt';
+  a.click(); URL.revokeObjectURL(url);
+  UI.toast('Reporte exportado <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success');
+}
+
+function showModal() { document.getElementById('modal').classList.add('show'); }
+function hideModal() { document.getElementById('modal').classList.remove('show'); }
+
+async function createGoal() {
+  const name = document.getElementById('g-name').value.trim();
+  const target = parseFloat(document.getElementById('g-target').value);
+  const date = document.getElementById('g-date').value || null;
+  const btn = document.getElementById('save-btn');
+  if (!name) { UI.toast('Ingresa un nombre','error'); return; }
+  if (!target || target <= 0) { UI.toast('Ingresa un monto válido','error'); return; }
+  UI.setButtonLoading(btn, true);
+  try {
+    const res = await GoalAPI.create(name, null, target, date);
+    if (res?.success) { UI.toast('Meta creada <i class="fa-solid fa-circle-check" style="color:#4CAF50"></i>','success'); hideModal(); await init(); }
+    else UI.toast(res?.message||'Error','error');
+  } catch(err) { UI.toast(err.message,'error'); }
+  finally { UI.setButtonLoading(btn, false); }
+}
+
+async function syncGoal(id) {
+  const res = await GoalAPI.syncProgress(id);
+  if (res?.success) { UI.toast('Meta sincronizada','success'); await init(); }
+}
+
+async function deleteGoal(id) {
+  if (!confirm('¿Eliminar esta meta?')) return;
+  const res = await GoalAPI.delete(id);
+  if (res?.success) { UI.toast('Meta eliminada','success'); await init(); }
+}
+
+init();
+</script>
+</body>
+</html>

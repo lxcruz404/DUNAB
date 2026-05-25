@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUNAB - Crear Cuenta</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:#fff;border-radius:20px;overflow:hidden;width:100%;max-width:860px;display:flex;min-height:580px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+  .left{padding:40px 44px;flex:1;display:flex;flex-direction:column;justify-content:center;overflow-y:auto}
+  .logo{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+  .logo-icon{display:none}
+  .logo-text span:first-child{font-size:0.72rem;color:#8B1A4A;font-weight:500;letter-spacing:1px;text-transform:uppercase;display:block}
+  .logo-text span:last-child{font-size:1.6rem;font-weight:800;color:#8B1A4A;line-height:1;letter-spacing:-1px}
+  h2{font-size:1.2rem;font-weight:700;color:#1a1a1a;margin-bottom:4px}
+  .subtitle{color:#888;font-size:0.85rem;margin-bottom:22px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-group{margin-bottom:14px}
+  label{display:block;font-weight:600;font-size:0.85rem;color:#1a1a1a;margin-bottom:6px}
+  input,select{width:100%;padding:11px 14px;background:#f0f0f0;border:2px solid transparent;border-radius:10px;font-size:0.88rem;color:#1a1a1a;outline:none;transition:all 0.2s}
+  input:focus,select:focus{background:#fff;border-color:#8B1A4A}
+  select option{background:#fff}
+  .btn{width:100%;padding:13px;background:#8B1A4A;border:none;border-radius:25px;color:#fff;font-size:0.95rem;font-weight:700;cursor:pointer;margin-top:6px;transition:all 0.2s}
+  .btn:hover{background:#6d1439}
+  .btn:disabled{opacity:0.6;cursor:not-allowed}
+  .link{text-align:center;margin-top:14px;font-size:0.85rem;color:#666}
+  .link a{color:#8B1A4A;text-decoration:none;font-weight:600}
+  .error{background:#fde8e8;border:1px solid #f5c6c6;border-radius:8px;padding:10px 14px;color:#c0392b;font-size:0.83rem;margin-bottom:12px;display:none}
+  .bonus{background:#fff8e6;border:1px solid #f5a623;border-radius:8px;padding:10px;text-align:center;font-size:0.8rem;color:#a07000;margin-top:10px}
+  .right{flex:1;background:#8B1A4A;border-radius:0 20px 20px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+  .right img{width:80%;max-width:220px;object-fit:contain;filter:brightness(0) invert(1);opacity:0.9}
+  .right p{color:rgba(255,255,255,0.7);font-size:0.82rem;text-align:center;margin-top:16px;line-height:1.6}
+  @media(max-width:640px){.right{display:none}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="left">
+    <div class="logo">
+      <img src="/logo-unab.png" alt="UNAB" style="height:52px;object-fit:contain" onerror="this.style.display='none'">
+      <div class="logo-text">
+        <span>Universidad</span>
+        <span>unab</span>
+      </div>
+    </div>
+    <h2>Crear cuenta</h2>
+    <p class="subtitle">Completa todos tus datos para activar tu acceso</p>
+    <div class="error" id="error-msg"></div>
+    <form id="register-form">
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" id="fullName" placeholder="Tu nombre completo" required>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>Código Estudiantil</label>
+          <input type="text" id="studentCode" placeholder="Ej: U0017890" required>
+        </div>
+        <div class="form-group">
+          <label>Correo Institucional</label>
+          <input type="email" id="email" placeholder="tu@unab.edu.co" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Contraseña (mín. 6 caracteres)</label>
+        <input type="password" id="password" placeholder="••••••••" required minlength="6">
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>Carrera</label>
+          <select id="career">
+            <option value="">Seleccionar</option>
+            <option>Ingeniería de Sistemas</option>
+            <option>Medicina</option>
+            <option>Derecho</option>
+            <option>Administración</option>
+            <option>Psicología</option>
+            <option>Arquitectura</option>
+            <option>Contaduría</option>
+            <option>Comunicación Social</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Semestre</label>
+          <select id="semester">
+            <option value="">Seleccionar</option>
+            <option value="1">1° Semestre</option>
+            <option value="2">2° Semestre</option>
+            <option value="3">3° Semestre</option>
+            <option value="4">4° Semestre</option>
+            <option value="5">5° Semestre</option>
+            <option value="6">6° Semestre</option>
+            <option value="7">7° Semestre</option>
+            <option value="8">8° Semestre</option>
+            <option value="9">9° Semestre</option>
+            <option value="10">10° Semestre</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn" id="register-btn">Crear Cuenta</button>
+      <div class="bonus"><i class="fa-solid fa-gift"></i> Al registrarte recibes <strong>500 DUNAB</strong> de bienvenida</div>
+    </form>
+    <div class="link">¿Ya tienes cuenta? <a href="/login.html">Iniciar sesión</a></div>
+  </div>
+  <div class="right">
+    <img src="/logo-unab.png" alt="UNAB">
+    <p>Universidad Autonoma<br>de Bucaramanga<br><br>Crea tu cuenta<br>DUNAB</p>
+  </div>
+</div>
+<script src="/api.js"></script>
+<script>
+redirectIfLoggedIn();
+function validateEmail(input) {
+  const val = input.value.toLowerCase();
+  const hint = document.getElementById('email-hint');
+  if (hint) {
+    if (val && !val.endsWith('@unab.edu.co')) {
+      hint.textContent = 'Solo se permiten correos @unab.edu.co';
+      hint.style.color = '#dc3545';
+      input.style.borderColor = '#dc3545';
+    } else if (val.endsWith('@unab.edu.co')) {
+      hint.textContent = 'Correo institucional valido';
+      hint.style.color = '#4CAF50';
+      input.style.borderColor = '#4CAF50';
+    } else {
+      hint.textContent = 'Usa tu correo institucional @unab.edu.co';
+      hint.style.color = '#888';
+      input.style.borderColor = '';
+    }
+  }
+}
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('register-btn');
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+  UI.setButtonLoading(btn, true);
+  try {
+    const res = await AuthAPI.register(
+      document.getElementById('fullName').value,
+      document.getElementById('email').value,
+      document.getElementById('studentCode').value,
+      document.getElementById('password').value,
+      document.getElementById('career').value || null,
+      parseInt(document.getElementById('semester').value) || null
+    );
+    if (res && res.success) {
+      window.location.href = '/dashboard.html';
+    } else {
+      errEl.textContent = res?.message || 'Error en el registro';
+      errEl.style.display = 'block';
+    }
+  } catch(err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    UI.setButtonLoading(btn, false);
+  }
+});
+</script>
+</body>
+</html>

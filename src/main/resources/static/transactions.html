@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<script>
+(function(){var t=localStorage.getItem('dunab_theme')||'light';document.documentElement.setAttribute('data-theme',t);var bg=t==='dark'?'#1a0a0f':'#8B1A4A';var card=t==='dark'?'#2d1520':'#fff';document.write('<style>html,body{background:'+bg+' !important}.card{background:'+card+' !important}
+/* Dark mode - transactions */
+[data-theme="dark"] .card { background: var(--card-bg,#2d1520) !important; }
+[data-theme="dark"] .card-title { color: var(--text-primary,#f0e6ea) !important; }
+[data-theme="dark"] .summary-card { background: var(--card-bg,#2d1520) !important; }
+[data-theme="dark"] .s-num { color: var(--text-primary,#f0e6ea) !important; }
+[data-theme="dark"] .s-lbl { color: var(--text-secondary,#a07080) !important; }
+[data-theme="dark"] .summary-card.ingreso { border-color:#4CAF50; }
+[data-theme="dark"] .summary-card.gasto { border-color:#dc3545; }
+[data-theme="dark"] .summary-card.balance { border-color:#E8A020; }
+[data-theme="dark"] .tx-table th { background: rgba(139,26,74,0.15) !important; color: var(--text-secondary,#a07080) !important; }
+[data-theme="dark"] .tx-table td { color: var(--text-primary,#f0e6ea) !important; border-color: var(--border-color,#5d3040) !important; }
+[data-theme="dark"] .tx-table tr:hover td { background: rgba(139,26,74,0.08) !important; }
+[data-theme="dark"] .filter-select { background: var(--input-bg,#3d2030) !important; color: var(--text-primary,#f0e6ea) !important; border-color: var(--border-color,#5d3040) !important; }
+[data-theme="dark"] .pag-btn { background: var(--input-bg,#3d2030) !important; color: var(--text-secondary,#a07080) !important; border-color: var(--border-color,#5d3040) !important; }
+[data-theme="dark"] .pag-btn.active { background: #8B1A4A !important; color: #fff !important; }
+[data-theme="dark"] .pag-btn:hover:not(.active) { background: rgba(139,26,74,0.15) !important; }
+[data-theme="dark"] .amount-ingreso { color: #81c784 !important; }
+[data-theme="dark"] .amount-gasto { color: #e57373 !important; }
+[data-theme="dark"] #results-count { color: var(--text-secondary,#a07080) !important; }
+</style>');})();
+</script>
+<link rel="stylesheet" href="/theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>DUNAB - Seguimiento de Dinero</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#8B1A4A;min-height:100vh}
+main{padding:28px 36px;max-width:1100px;margin:0 auto}
+.card{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px}
+.card-title{font-size:1rem;font-weight:700;color:var(--text-primary,#1a1a1a);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.summary-card{background:#fff;border-radius:14px;padding:18px;text-align:center;border-left:4px solid #8B1A4A}
+.summary-card.ingreso{border-color:#4CAF50}
+.summary-card.gasto{border-color:#dc3545}
+.summary-card.balance{border-color:#E8A020}
+.s-num{font-size:1.6rem;font-weight:800;color:var(--text-primary,#1a1a1a)}
+.s-lbl{font-size:0.75rem;color:var(--text-secondary,#888);text-transform:uppercase;letter-spacing:0.3px;margin-top:4px}
+.filters{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-select{padding:8px 14px;border:1px solid var(--border-color,#ddd);border-radius:10px;font-size:0.85rem;background:var(--input-bg,#fff);color:var(--text-primary,#1a1a1a);outline:none}
+.filter-select:focus{border-color:#8B1A4A}
+.tx-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+.tx-table th{text-align:left;padding:11px 14px;background:var(--table-header,#f5f5f5);color:var(--text-secondary,#555);font-weight:600;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.3px}
+.tx-table td{padding:11px 14px;border-bottom:1px solid var(--border-color,#f0f0f0);color:var(--text-primary,#1a1a1a);vertical-align:middle}
+.tx-table tr:hover td{background:var(--row-hover,#fafafa)}
+.badge{padding:4px 10px;border-radius:10px;font-size:0.75rem;font-weight:600}
+.badge.ingreso{background:#d4edda;color:#155724}
+.badge.gasto{background:#f8d7da;color:#721c24}
+.amount-ingreso{color:#4CAF50;font-weight:700}
+.amount-gasto{color:#dc3545;font-weight:700}
+.pag{display:flex;gap:8px;justify-content:center;margin-top:16px}
+.pag-btn{padding:7px 14px;border:1px solid var(--border-color,#ddd);border-radius:8px;background:var(--input-bg,#fff);color:var(--text-primary,#555);cursor:pointer;font-size:0.82rem}
+.pag-btn.active{background:#8B1A4A;color:#fff;border-color:#8B1A4A}
+.pag-btn:hover:not(.active){background:var(--hover,#f5f5f5)}
+.empty{text-align:center;padding:40px;color:var(--text-secondary,#aaa)}
+@media(max-width:700px){.summary-grid{grid-template-columns:1fr 1fr}}
+
+/* Dark mode - transactions */
+[data-theme="dark"] .card { background: var(--card-bg,#2d1520) !important; }
+[data-theme="dark"] .card-title { color: var(--text-primary,#f0e6ea) !important; }
+[data-theme="dark"] .summary-card { background: var(--card-bg,#2d1520) !important; }
+[data-theme="dark"] .s-num { color: var(--text-primary,#f0e6ea) !important; }
+[data-theme="dark"] .s-lbl { color: var(--text-secondary,#a07080) !important; }
+[data-theme="dark"] .summary-card.ingreso { border-color:#4CAF50; }
+[data-theme="dark"] .summary-card.gasto { border-color:#dc3545; }
+[data-theme="dark"] .summary-card.balance { border-color:#E8A020; }
+[data-theme="dark"] .tx-table th { background: rgba(139,26,74,0.15) !important; color: var(--text-secondary,#a07080) !important; }
+[data-theme="dark"] .tx-table td { color: var(--text-primary,#f0e6ea) !important; border-color: var(--border-color,#5d3040) !important; }
+[data-theme="dark"] .tx-table tr:hover td { background: rgba(139,26,74,0.08) !important; }
+[data-theme="dark"] .filter-select { background: var(--input-bg,#3d2030) !important; color: var(--text-primary,#f0e6ea) !important; border-color: var(--border-color,#5d3040) !important; }
+[data-theme="dark"] .pag-btn { background: var(--input-bg,#3d2030) !important; color: var(--text-secondary,#a07080) !important; border-color: var(--border-color,#5d3040) !important; }
+[data-theme="dark"] .pag-btn.active { background: #8B1A4A !important; color: #fff !important; }
+[data-theme="dark"] .pag-btn:hover:not(.active) { background: rgba(139,26,74,0.15) !important; }
+[data-theme="dark"] .amount-ingreso { color: #81c784 !important; }
+[data-theme="dark"] .amount-gasto { color: #e57373 !important; }
+[data-theme="dark"] #results-count { color: var(--text-secondary,#a07080) !important; }
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div id="nav-container"></div>
+<main>
+  <div class="summary-grid" id="summary-grid">
+    <div class="summary-card ingreso"><div class="s-num" id="total-ingreso">0 D</div><div class="s-lbl">Total Ingresos</div></div>
+    <div class="summary-card gasto"><div class="s-num" id="total-gasto">0 D</div><div class="s-lbl">Total Gastos</div></div>
+    <div class="summary-card balance"><div class="s-num" id="saldo-actual">0 D</div><div class="s-lbl">Saldo Actual</div></div>
+    <div class="summary-card"><div class="s-num" id="total-tx">0</div><div class="s-lbl">Movimientos</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="fa-solid fa-clock-rotate-left" style="color:#8B1A4A"></i> Historial de Transacciones</div>
+    <div class="filters">
+      <select class="filter-select" id="filter-type" onchange="applyFilters()">
+        <option value="">Todos los tipos</option>
+        <option value="INGRESO">Solo Ingresos</option>
+        <option value="GASTO">Solo Gastos</option>
+      </select>
+      <select class="filter-select" id="filter-cat" onchange="applyFilters()">
+        <option value="">Todas las Categorías</option>
+        <option value="ALIMENTACION">Alimentacion</option>
+        <option value="TRANSPORTE">Transporte</option>
+        <option value="MATERIALES">Materiales</option>
+        <option value="ACTIVIDADES">Actividades</option>
+        <option value="ENTRETENIMIENTO">Entretenimiento</option>
+        <option value="SALUD">Salud</option>
+        <option value="TRANSFERENCIA">Transferencia</option>
+        <option value="OTROS">Otros</option>
+      </select>
+      <span id="results-count" style="font-size:0.82rem;color:var(--text-secondary,#888);margin-left:auto"></span>
+    </div>
+    <table class="tx-table">
+      <thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Monto</th><th>Saldo despues</th><th>Tipo</th></tr></thead>
+      <tbody id="tx-body"><tr><td colspan="6" class="empty">Cargando...</td></tr></tbody>
+    </table>
+    <div class="pag" id="pag-container"></div>
+  </div>
+</main>
+<script src="/theme.js"></script>
+<script src="/api.js"></script>
+<script src="/layout.js"></script>
+<script>
+let allTx = [];
+let filteredTx = [];
+let currentPage = 0;
+const PAGE_SIZE = 15;
+
+async function init() {
+  const u = requireAuth(); if (!u) return;
+  const pr = await UserAPI.getProfile();
+  if (pr?.data) {
+    document.getElementById('header-container').innerHTML = renderHeader('Bienvenido, ' + pr.data.fullName.split(' ')[0], '', pr.data);
+    document.getElementById('nav-container').innerHTML = renderNav('transactions');
+    initTheme();
+    document.getElementById('saldo-actual').textContent = UI.formatDunab(pr.data.dunabBalance);
+  }
+  // Load all transactions
+  const res = await TransactionAPI.getAll(0, 500);
+  if (res?.data) {
+    allTx = res.data.content || res.data || [];
+    calcSummary();
+    applyFilters();
+  }
+}
+
+function calcSummary() {
+  const ingresos = allTx.filter(t=>t.type==='INGRESO').reduce((s,t)=>s+Math.abs(t.amount),0);
+  const gastos = allTx.filter(t=>t.type==='GASTO').reduce((s,t)=>s+Math.abs(t.amount),0);
+  document.getElementById('total-ingreso').textContent = UI.formatDunab(ingresos);
+  document.getElementById('total-gasto').textContent = UI.formatDunab(gastos);
+  document.getElementById('total-tx').textContent = allTx.length;
+}
+
+function applyFilters() {
+  const type = document.getElementById('filter-type').value;
+  const cat = document.getElementById('filter-cat').value;
+  filteredTx = allTx.filter(t => {
+    if (type && t.type !== type) return false;
+    if (cat && t.category !== cat) return false;
+    return true;
+  });
+  currentPage = 0;
+  document.getElementById('results-count').textContent = filteredTx.length + ' movimientos';
+  renderPage();
+}
+
+function renderPage() {
+  const start = currentPage * PAGE_SIZE;
+  const page = filteredTx.slice(start, start + PAGE_SIZE);
+  const tbody = document.getElementById('tx-body');
+  if (!page.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No hay movimientos con ese filtro</td></tr>';
+    document.getElementById('pag-container').innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = page.map(tx => `<tr>
+    <td style="white-space:nowrap">${UI.formatDate(tx.transactionDate)}</td>
+    <td>${tx.description}</td>
+    <td><span style="font-size:0.78rem;color:var(--text-secondary,#888)">${tx.category}</span></td>
+    <td class="amount-${tx.type.toLowerCase()}">${tx.type==='INGRESO'?'+':'-'}${Math.abs(tx.amount)} D</td>
+    <td style="color:var(--text-secondary,#888);font-size:0.82rem">${tx.balanceAfter != null ? UI.formatDunab(tx.balanceAfter) : '-'}</td>
+    <td><span class="badge ${tx.type.toLowerCase()}">${tx.type==='INGRESO'?'Ingreso':'Egreso'}</span></td>
+  </tr>`).join('');
+
+  // Pagination
+  const totalPages = Math.ceil(filteredTx.length / PAGE_SIZE);
+  let pag = '';
+  for (let i = 0; i < totalPages; i++) {
+    pag += `<button class="pag-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i+1}</button>`;
+  }
+  document.getElementById('pag-container').innerHTML = pag;
+  initTheme();
+}
+
+function goPage(p) { currentPage = p; renderPage(); window.scrollTo(0,0); }
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>DUNAB - Acceso Administrativo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#1a0a0f;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.container{width:100%;max-width:460px}
+.logo-wrap{text-align:center;margin-bottom:32px}
+.logo-wrap img{height:90px;object-fit:contain;filter:brightness(0) invert(1);opacity:0.9}
+.logo-wrap .univ-name{color:rgba(255,255,255,0.5);font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;margin-top:10px;display:block}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(139,26,74,0.3);border:1px solid rgba(139,26,74,0.5);color:#f0c0d0;padding:5px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-top:10px}
+.card{background:#2d1520;border:1px solid rgba(139,26,74,0.3);border-radius:20px;padding:36px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+h2{font-size:1.2rem;font-weight:700;color:#f0e6ea;margin-bottom:6px}
+.subtitle{color:#a07080;font-size:0.85rem;margin-bottom:28px;line-height:1.5}
+.form-group{margin-bottom:18px}
+label{display:block;color:#c09090;font-size:0.82rem;font-weight:600;margin-bottom:7px}
+input{width:100%;padding:13px 16px;background:#3d2030;border:1px solid #5d3040;border-radius:10px;color:#f0e6ea;font-size:0.9rem;outline:none;transition:all 0.2s}
+input:focus{border-color:#8B1A4A;background:#4d2535}
+input::placeholder{color:#806070}
+.btn{width:100%;padding:14px;background:#8B1A4A;border:none;border-radius:25px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{background:#a02060}
+.btn:disabled{opacity:0.6;cursor:not-allowed}
+.error{background:rgba(220,53,69,0.15);border:1px solid rgba(220,53,69,0.3);border-radius:8px;padding:10px 14px;color:#f5a5a5;font-size:0.82rem;margin-bottom:14px;display:none}
+.back{text-align:center;margin-top:24px}
+.back a{color:#806070;text-decoration:none;font-size:0.82rem;display:inline-flex;align-items:center;gap:6px;transition:color 0.2s}
+.back a:hover{color:#f0c0d0}
+.security-note{margin-top:20px;padding:12px 14px;background:rgba(232,160,32,0.06);border:1px solid rgba(232,160,32,0.12);border-radius:10px;font-size:0.75rem;color:#c09050;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.divider{height:1px;background:rgba(139,26,74,0.2);margin:20px 0}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo-wrap">
+    <img src="/logo-unab.png" alt="Universidad UNAB">
+    <span class="univ-name">Universidad Autónoma de Bucaramanga</span>
+    <div><span class="badge"><i class="fa-solid fa-shield-halved"></i> Portal Administrativo</span></div>
+  </div>
+  <div class="card">
+    <h2>Acceso Restringido</h2>
+    <p class="subtitle">Solo personal autorizado por el administrador principal. Esta sesión es monitoreada.</p>
+    <div class="error" id="error-msg"></div>
+    <form id="admin-form">
+      <div class="form-group">
+        <label><i class="fa-solid fa-envelope" style="margin-right:5px"></i> Correo administrativo</label>
+        <input type="email" id="email" placeholder="admin@unab.edu.co" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label><i class="fa-solid fa-lock" style="margin-right:5px"></i> Contraseña</label>
+        <div style="position:relative">
+        <input type="password" id="password" placeholder="••••••••" required style="padding-right:44px">
+        <button type="button" onclick="togglePw()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#806070;padding:4px"><i id="eye-icon" class="fa-solid fa-eye"></i></button>
+      </div>
+      </div>
+      <button type="submit" class="btn" id="login-btn">
+        <i class="fa-solid fa-right-to-bracket"></i> Ingresar al Panel
+      </button>
+    </form>
+    <div class="divider"></div>
+    <div class="security-note">
+      <i class="fa-solid fa-circle-info" style="color:#E8A020;margin-top:1px;flex-shrink:0"></i>
+      <span>El acceso a este portal está restringido. Si necesitas acceso, contacta al Administrador Principal. El registro de administradores solo lo puede hacer el Admin Principal.</span>
+    </div>
+  </div>
+  <div class="back">
+    <a href="/login.html">
+      <i class="fa-solid fa-arrow-left"></i> Volver al portal estudiantil
+    </a>
+  </div>
+</div>
+<script src="/api.js"></script>
+<script>
+function togglePw(){
+  const i=document.getElementById('password');
+  const s=i.type==='password';
+  i.type=s?'text':'password';
+  document.getElementById('eye-icon').className=s?'fa-solid fa-eye-slash':'fa-solid fa-eye';
+}
+if(Auth.isLoggedIn()&&Auth.isAdmin()) window.location.href='/admin.html';
+document.getElementById('admin-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn=document.getElementById('login-btn');
+  const errEl=document.getElementById('error-msg');
+  errEl.style.display='none';
+  UI.setButtonLoading(btn,true);
+  try {
+    const res=await AuthAPI.login(
+      document.getElementById('email').value,
+      document.getElementById('password').value
+    );
+    if(res?.success){
+      if(!Auth.isAdmin()){
+        Auth.removeToken(); Auth.removeUser();
+        errEl.textContent='Acceso denegado. Esta area es solo para administradores DUNAB.';
+        errEl.style.display='block';
+        return;
+      }
+      window.location.href='/admin.html';
+    } else {
+      errEl.textContent=res?.message||'Credenciales incorrectas';
+      errEl.style.display='block';
+    }
+  } catch(err){
+    errEl.textContent=err.message;
+    errEl.style.display='block';
+  } finally { UI.setButtonLoading(btn,false); }
+});
+</script>
+</body>
+</html>
